@@ -1,0 +1,17 @@
+{
+  "httpMethod": "POST",
+  "path": "/onboarding/start",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"action\":\"start\"}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "test-user-id",
+        "email": "test@example.com",
+        "cognito:username": "test-user"
+      }
+    }
+  }
+}

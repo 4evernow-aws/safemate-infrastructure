@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+README.md
+
+# Node modules (will be installed in container)
+node_modules
+npm-debug.log*
+
+# Environment files (except .env.production which we need)
+.env
+.env.local
+.env.development
+
+# Build outputs (except the one we're building)
+dist
+build
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Terraform
+terraform/.terraform
+terraform/tfplan
+terraform/*.tfstate*
+terraform_outputs.json
+
+# Docker
+docker-compose.override.yml
+Dockerfile.dev
+
+# Logs
+*.log
+logs
+
+# Temporary files
+tmp
+temp 

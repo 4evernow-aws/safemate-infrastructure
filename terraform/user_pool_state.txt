@@ -1,0 +1,167 @@
+# aws_cognito_user_pool.app_pool_v2:
+resource "aws_cognito_user_pool" "app_pool_v2" {
+    arn                        = "arn:aws:cognito-idp:ap-southeast-2:994220462693:userpool/ap-southeast-2_bUngJqSfu"
+    creation_date              = "2025-09-12T04:38:25Z"
+    custom_domain              = [90mnull[0m[0m
+    deletion_protection        = "INACTIVE"
+    domain                     = [90mnull[0m[0m
+    email_verification_message = "Your verification code for SafeMate is {####}"
+    email_verification_subject = "Verification code for SafeMate"
+    endpoint                   = "cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_bUngJqSfu"
+    estimated_number_of_users  = 0
+    id                         = "ap-southeast-2_bUngJqSfu"
+    last_modified_date         = "2025-09-12T04:38:25Z"
+    mfa_configuration          = "OFF"
+    name                       = "dev-safemate-user-pool-v5"
+    sms_authentication_message = [90mnull[0m[0m
+    sms_verification_message   = [90mnull[0m[0m
+    tags                       = {
+        "Application" = "safemate"
+    }
+    tags_all                   = {
+        "Application" = "safemate"
+    }
+    user_pool_tier             = "ESSENTIALS"
+    username_attributes        = [
+        "email",
+    ]
+
+    account_recovery_setting {
+        recovery_mechanism {
+            name     = "verified_email"
+            priority = 1
+        }
+    }
+
+    admin_create_user_config {
+        allow_admin_create_user_only = false
+
+        invite_message_template {
+            email_message = "Welcome to SafeMate {username}! Please verify your email address to complete your account setup. Your verification code is {####}"
+            email_subject = "Welcome to SafeMate - Please verify your email"
+            sms_message   = "Welcome to SafeMate {username}! Your verification code is {####}"
+        }
+    }
+
+    email_configuration {
+        configuration_set      = [90mnull[0m[0m
+        email_sending_account  = "COGNITO_DEFAULT"
+        from_email_address     = [90mnull[0m[0m
+        reply_to_email_address = [90mnull[0m[0m
+        source_arn             = [90mnull[0m[0m
+    }
+
+    password_policy {
+        minimum_length                   = 8
+        password_history_size            = 0
+        require_lowercase                = true
+        require_numbers                  = true
+        require_symbols                  = false
+        require_uppercase                = true
+        temporary_password_validity_days = 7
+    }
+
+    schema {
+        attribute_data_type = "Number"
+        mutable             = true
+        name                = "asset_count"
+        required            = false
+
+        number_attribute_constraints {
+            max_value = "999999"
+            min_value = "0"
+        }
+    }
+    schema {
+        attribute_data_type = "Number"
+        mutable             = true
+        name                = "mate_balance"
+        required            = false
+
+        number_attribute_constraints {
+            max_value = "999999999"
+            min_value = "0"
+        }
+    }
+    schema {
+        attribute_data_type = "Number"
+        mutable             = true
+        name                = "storage_used"
+        required            = false
+
+        number_attribute_constraints {
+            max_value = "999999999"
+            min_value = "0"
+        }
+    }
+    schema {
+        attribute_data_type = "String"
+        mutable             = true
+        name                = "account_type"
+        required            = false
+
+        string_attribute_constraints {
+            max_length = "50"
+            min_length = "0"
+        }
+    }
+    schema {
+        attribute_data_type = "String"
+        mutable             = true
+        name                = "hedera_account"
+        required            = false
+
+        string_attribute_constraints {
+            max_length = "50"
+            min_length = "0"
+        }
+    }
+    schema {
+        attribute_data_type = "String"
+        mutable             = true
+        name                = "kyc_status"
+        required            = false
+
+        string_attribute_constraints {
+            max_length = "20"
+            min_length = "0"
+        }
+    }
+    schema {
+        attribute_data_type = "String"
+        mutable             = true
+        name                = "last_activity"
+        required            = false
+
+        string_attribute_constraints {
+            max_length = "30"
+            min_length = "0"
+        }
+    }
+    schema {
+        attribute_data_type = "String"
+        mutable             = true
+        name                = "subscription_tier"
+        required            = false
+
+        string_attribute_constraints {
+            max_length = "20"
+            min_length = "0"
+        }
+    }
+
+    sign_in_policy {
+        allowed_first_auth_factors = [
+            "PASSWORD",
+        ]
+    }
+
+    verification_message_template {
+        default_email_option  = "CONFIRM_WITH_CODE"
+        email_message         = "Your verification code for SafeMate is {####}"
+        email_message_by_link = [90mnull[0m[0m
+        email_subject         = "Verification code for SafeMate"
+        email_subject_by_link = [90mnull[0m[0m
+        sms_message           = [90mnull[0m[0m
+    }
+}

@@ -1,0 +1,13 @@
+{
+  "FunctionName": "default-safemate-ultimate-wallet",
+  "Environment": {
+    "Variables": {
+      "WALLET_KEYS_TABLE": "safemate-wallet-keys",
+      "WALLET_METADATA_TABLE": "safemate-wallet-metadata",
+      "APP_SECRETS_KMS_KEY_ID": "alias/safemate-master-key-dev",
+      "WALLET_KMS_KEY_ID": "alias/safemate-master-key-dev",
+      "HEDERA_NETWORK": "testnet",
+      "USER_ONBOARDING_FUNCTION": "default-safemate-user-onboarding"
+    }
+  }
+}

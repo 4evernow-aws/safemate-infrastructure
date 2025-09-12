@@ -1,0 +1,8 @@
+{
+  "WALLET_KEYS_TABLE": "safemate-wallet-keys",
+  "WALLET_METADATA_TABLE": "safemate-wallet-metadata",
+  "APP_SECRETS_KMS_KEY_ID": "alias/safemate-app-secrets",
+  "WALLET_KMS_KEY_ID": "alias/safemate-wallet-keys",
+  "HEDERA_NETWORK": "testnet",
+  "AWS_REGION": "ap-southeast-2"
+}

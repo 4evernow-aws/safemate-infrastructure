@@ -1,0 +1,125 @@
+﻿# Fix CORS for /folders endpoint
+# This script configures the OPTIONS method for /folders to handle CORS preflight requests
+
+Write-Host "Fixing CORS for /folders endpoint..." -ForegroundColor Yellow
+
+$API_ID = "527ye7o1j0"
+$STAGE_NAME = "default"
+
+# Step 1: Get the folders resource ID
+Write-Host "Step 1: Getting API Gateway resources..." -ForegroundColor Cyan
+$resources = aws apigateway get-resources --rest-api-id $API_ID --output json
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to get API Gateway resources" -ForegroundColor Red
+    exit 1
+}
+
+$resourcesObj = $resources | ConvertFrom-Json
+$foldersResource = $resourcesObj.items | Where-Object { $_.path -eq "/folders" }
+
+if (-not $foldersResource) {
+    Write-Host "/folders resource not found" -ForegroundColor Red
+    exit 1
+}
+
+$foldersResourceId = $foldersResource.id
+Write-Host "Found /folders resource: $foldersResourceId" -ForegroundColor Green
+
+# Step 2: Check if OPTIONS method exists
+Write-Host "Step 2: Checking OPTIONS method..." -ForegroundColor Cyan
+$methods = aws apigateway get-method --rest-api-id $API_ID --resource-id $foldersResourceId --http-method OPTIONS --output json 2>$null
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "OPTIONS method doesn't exist, creating it..." -ForegroundColor Yellow
+    
+    # Create OPTIONS method
+    aws apigateway put-method --rest-api-id $API_ID --resource-id $foldersResourceId --http-method OPTIONS --authorization-type NONE --output json
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Failed to create OPTIONS method" -ForegroundColor Red
+        exit 1
+    }
+    
+    Write-Host "Created OPTIONS method" -ForegroundColor Green
+} else {
+    Write-Host "OPTIONS method exists" -ForegroundColor Green
+}
+
+# Step 3: Configure OPTIONS method integration (Mock)
+Write-Host "Step 3: Configuring OPTIONS method integration..." -ForegroundColor Cyan
+
+# Use a simple approach - just set the integration type without complex templates
+aws apigateway put-integration --rest-api-id $API_ID --resource-id $foldersResourceId --http-method OPTIONS --type MOCK --output json
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to configure OPTIONS integration" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Configured OPTIONS integration" -ForegroundColor Green
+
+# Step 4: Configure OPTIONS method response
+Write-Host "Step 4: Configuring OPTIONS method response..." -ForegroundColor Cyan
+
+# Use a simpler approach with direct parameters
+aws apigateway put-method-response --rest-api-id $API_ID --resource-id $foldersResourceId --http-method OPTIONS --status-code 200 --response-parameters '{"method.response.header.Access-Control-Allow-Origin":true,"method.response.header.Access-Control-Allow-Headers":true,"method.response.header.Access-Control-Allow-Methods":true,"method.response.header.Access-Control-Allow-Credentials":true,"method.response.header.Access-Control-Max-Age":true}' --output json
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to configure OPTIONS method response" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Configured OPTIONS method response" -ForegroundColor Green
+
+# Step 5: Configure OPTIONS integration response
+Write-Host "Step 5: Configuring OPTIONS integration response..." -ForegroundColor Cyan
+
+# Use a simpler approach with direct parameters
+aws apigateway put-integration-response --rest-api-id $API_ID --resource-id $foldersResourceId --http-method OPTIONS --status-code 200 --response-parameters '{"method.response.header.Access-Control-Allow-Origin":"'"'"'http://localhost:5173'"'"'","method.response.header.Access-Control-Allow-Headers":"'"'"'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-id-token,x-cognito-access-token,Accept'"'"'","method.response.header.Access-Control-Allow-Methods":"'"'"'GET,POST,OPTIONS'"'"'","method.response.header.Access-Control-Allow-Credentials":"'"'"'true'"'"'","method.response.header.Access-Control-Max-Age":"'"'"'3600'"'"'"}' --output json
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to configure OPTIONS integration response" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Configured OPTIONS integration response" -ForegroundColor Green
+
+# Step 6: Deploy the API
+Write-Host "Step 6: Deploying API..." -ForegroundColor Cyan
+
+aws apigateway create-deployment --rest-api-id $API_ID --stage-name $STAGE_NAME --output json
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Failed to deploy API" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "API deployed successfully" -ForegroundColor Green
+
+# Step 7: Test the CORS configuration
+Write-Host "Step 7: Testing CORS configuration..." -ForegroundColor Cyan
+
+$testUrl = "https://$API_ID.execute-api.ap-southeast-2.amazonaws.com/$STAGE_NAME/folders"
+Write-Host "Testing OPTIONS request to: $testUrl" -ForegroundColor Gray
+
+try {
+    $response = Invoke-WebRequest -Uri $testUrl -Method OPTIONS -Headers @{
+        "Origin" = "http://localhost:5173"
+        "Access-Control-Request-Method" = "GET"
+        "Access-Control-Request-Headers" = "Content-Type,Authorization"
+    } -ErrorAction Stop
+    
+    Write-Host "CORS test successful!" -ForegroundColor Green
+    Write-Host "Status Code: $($response.StatusCode)" -ForegroundColor Gray
+    Write-Host "CORS Headers:" -ForegroundColor Gray
+    $response.Headers | Where-Object { $_.Key -like "*Access-Control*" } | ForEach-Object {
+        Write-Host "  $($_.Key): $($_.Value)" -ForegroundColor Gray
+    }
+} catch {
+    Write-Host "CORS test failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+Write-Host "CORS fix completed for /folders endpoint!" -ForegroundColor Green
+Write-Host "The frontend should now be able to access the /folders endpoint without CORS errors." -ForegroundColor Cyan
+

@@ -1,0 +1,536 @@
+{
+  "scanDate": "2025-08-24T05:53:00.398Z",
+  "totalFiles": 308,
+  "duplicates": [
+    {
+      "hash": "4130f57be0da0581b97d20fbad999f95",
+      "files": [
+        {
+          "path": "apps\\web\\safemate\\cors-config.json",
+          "size": 822,
+          "modified": "2025-08-14T10:17:55.667Z",
+          "hash": "4130f57be0da0581b97d20fbad999f95"
+        },
+        {
+          "path": "apps\\web\\safemate\\status-integration-response.json",
+          "size": 822,
+          "modified": "2025-08-14T10:17:55.946Z",
+          "hash": "4130f57be0da0581b97d20fbad999f95"
+        }
+      ]
+    },
+    {
+      "hash": "d57e5c4e31b3099cbe73f19bfa7fb395",
+      "files": [
+        {
+          "path": "FINAL_LAMBDA_FIX_COMMANDS.md",
+          "size": 3174,
+          "modified": "2025-08-23T08:21:55.481Z",
+          "hash": "d57e5c4e31b3099cbe73f19bfa7fb395"
+        },
+        {
+          "path": "LAMBDA_ENV_VAR_FIX_SUMMARY.md",
+          "size": 3174,
+          "modified": "2025-08-23T08:47:26.340Z",
+          "hash": "d57e5c4e31b3099cbe73f19bfa7fb395"
+        }
+      ]
+    },
+    {
+      "hash": "9fbe8bd9cf8978742c15aff0f9097781",
+      "files": [
+        {
+          "path": "operator-key.json",
+          "size": 55,
+          "modified": "2025-08-18T00:04:10.305Z",
+          "hash": "9fbe8bd9cf8978742c15aff0f9097781"
+        },
+        {
+          "path": "query-operator.json",
+          "size": 55,
+          "modified": "2025-08-23T23:06:05.962Z",
+          "hash": "9fbe8bd9cf8978742c15aff0f9097781"
+        }
+      ]
+    },
+    {
+      "hash": "c0b877ce750463652dfea717663675a3",
+      "files": [
+        {
+          "path": "services\\user-onboarding\\test-lambda-payload.json",
+          "size": 357,
+          "modified": "2025-08-22T00:21:51.202Z",
+          "hash": "c0b877ce750463652dfea717663675a3"
+        },
+        {
+          "path": "test-start-payload.json",
+          "size": 357,
+          "modified": "2025-08-21T11:57:25.178Z",
+          "hash": "c0b877ce750463652dfea717663675a3"
+        }
+      ]
+    }
+  ],
+  "similar": [
+    {
+      "name": "index.html",
+      "files": [
+        {
+          "path": "apps\\web\\safemate\\index.html",
+          "size": 861,
+          "modified": "2025-08-14T10:17:55.676Z",
+          "hash": "b4e575985fd53c07926d2382d44e7b23"
+        },
+        {
+          "path": "apps\\web\\safemate\\public\\index.html",
+          "size": 560,
+          "modified": "2025-08-14T10:17:55.690Z",
+          "hash": "61b070d988a2432b7f4d2c7cd3e8c7c9"
+        }
+      ]
+    },
+    {
+      "name": "package-lock.json",
+      "files": [
+        {
+          "path": "apps\\web\\safemate\\package-lock.json",
+          "size": 650365,
+          "modified": "2025-08-22T23:43:46.495Z",
+          "hash": "d44dabff8d67ade52f592cb380844c5c"
+        },
+        {
+          "path": "lambda-layer\\nodejs\\package-lock.json",
+          "size": 241669,
+          "modified": "2025-08-23T10:03:55.322Z",
+          "hash": "d2b7a98311227031ab622d44d6c42b95"
+        },
+        {
+          "path": "lambda-layer\\package-lock.json",
+          "size": 256022,
+          "modified": "2025-08-22T23:04:31.660Z",
+          "hash": "eff892fcc32d44adb12b986b6f130b58"
+        },
+        {
+          "path": "package-lock.json",
+          "size": 375985,
+          "modified": "2025-08-23T23:54:38.246Z",
+          "hash": "8fef679860888e7ef1804aa4e5347006"
+        },
+        {
+          "path": "services\\consolidated-wallet-service\\package-lock.json",
+          "size": 297289,
+          "modified": "2025-08-23T02:55:36.991Z",
+          "hash": "b9a6cde1153caa1634aee33b2e6e897f"
+        },
+        {
+          "path": "services\\group-manager\\package-lock.json",
+          "size": 135161,
+          "modified": "2025-08-14T10:17:56.158Z",
+          "hash": "5dfb268e6e4f36d520fc856759ef0419"
+        },
+        {
+          "path": "services\\hedera-service\\package-lock.json",
+          "size": 412114,
+          "modified": "2025-08-21T13:04:40.247Z",
+          "hash": "5156c03bdee28959ad2c6652bb792ea5"
+        },
+        {
+          "path": "services\\post-confirmation-wallet-creator\\package-lock.json",
+          "size": 67810,
+          "modified": "2025-08-17T02:35:25.576Z",
+          "hash": "90f6c343feee057df029ebd69b617d3d"
+        },
+        {
+          "path": "services\\safemate-directory-creator\\package-lock.json",
+          "size": 251474,
+          "modified": "2025-08-14T10:17:56.184Z",
+          "hash": "81c923574aedc4aad4f6a4e43077fcd1"
+        },
+        {
+          "path": "services\\token-vault\\package-lock.json",
+          "size": 248563,
+          "modified": "2025-08-14T10:17:56.194Z",
+          "hash": "7db0888027e1d257a0fc77c80da7b287"
+        },
+        {
+          "path": "services\\ultimate-wallet-service\\package-lock.json",
+          "size": 327223,
+          "modified": "2025-08-24T04:22:21.693Z",
+          "hash": "5798f9c07264e97aab97333bd78c1200"
+        },
+        {
+          "path": "services\\user-onboarding\\package-lock.json",
+          "size": 340698,
+          "modified": "2025-08-22T11:01:10.421Z",
+          "hash": "1771b530cea368f92de124f4cd9b075c"
+        },
+        {
+          "path": "services\\wallet-manager\\package-lock.json",
+          "size": 297204,
+          "modified": "2025-08-14T10:17:56.258Z",
+          "hash": "0cf697ae476f1f6dcf1fc0cc30c8a2c7"
+        },
+        {
+          "path": "simple-lambda\\package-lock.json",
+          "size": 191511,
+          "modified": "2025-08-14T11:20:08.083Z",
+          "hash": "e23c562eb29513fac17a128e6f92b5d5"
+        }
+      ]
+    },
+    {
+      "name": "package.json",
+      "files": [
+        {
+          "path": "apps\\web\\safemate\\package.json",
+          "size": 1655,
+          "modified": "2025-08-22T23:03:05.516Z",
+          "hash": "80cec70a6f9e5ea7947d1807ea677211"
+        },
+        {
+          "path": "lambda-layer\\nodejs\\package.json",
+          "size": 190,
+          "modified": "2025-08-23T12:30:16.365Z",
+          "hash": "7ad28730e4bab00cfdc4981a26104e10"
+        },
+        {
+          "path": "lambda-layer\\package.json",
+          "size": 433,
+          "modified": "2025-08-22T23:02:11.684Z",
+          "hash": "faaf9dadd98cbd71a8c551abba25b7c9"
+        },
+        {
+          "path": "package.json",
+          "size": 895,
+          "modified": "2025-08-22T23:03:11.479Z",
+          "hash": "82bab40eaf4bc0bdd12aef719a30d3cd"
+        },
+        {
+          "path": "services\\consolidated-wallet-service\\package.json",
+          "size": 1115,
+          "modified": "2025-08-23T02:11:15.365Z",
+          "hash": "ad826b192772ba661d2749f72e47a9b9"
+        },
+        {
+          "path": "services\\group-manager\\package.json",
+          "size": 598,
+          "modified": "2025-08-14T10:17:56.160Z",
+          "hash": "670375ae3a13039f2bbd4ebeb020aa7e"
+        },
+        {
+          "path": "services\\hedera-service\\package.json",
+          "size": 880,
+          "modified": "2025-08-22T23:02:30.095Z",
+          "hash": "c89865bf7d3836d0c6bb04da4719ddd2"
+        },
+        {
+          "path": "services\\post-confirmation-wallet-creator\\package.json",
+          "size": 718,
+          "modified": "2025-08-14T10:17:56.178Z",
+          "hash": "16a59cdbdc708b48e80fb2e5ff5a4ce2"
+        },
+        {
+          "path": "services\\safemate-directory-creator\\package.json",
+          "size": 849,
+          "modified": "2025-08-22T23:02:36.144Z",
+          "hash": "07158f0e5be594cef885eba4bce4ccee"
+        },
+        {
+          "path": "services\\token-vault\\package.json",
+          "size": 585,
+          "modified": "2025-08-22T23:02:46.229Z",
+          "hash": "84d5449d7856c4579c20b54accec8a07"
+        },
+        {
+          "path": "services\\ultimate-wallet-service\\package.json",
+          "size": 535,
+          "modified": "2025-08-24T02:31:30.123Z",
+          "hash": "e1dcda78e4779fc221e7c048eb3b8e98"
+        },
+        {
+          "path": "services\\user-onboarding\\package.json",
+          "size": 906,
+          "modified": "2025-08-22T23:03:17.617Z",
+          "hash": "4fa6e83313ef89f4271e7ee6870f9ee8"
+        },
+        {
+          "path": "services\\wallet-manager\\package.json",
+          "size": 716,
+          "modified": "2025-08-22T23:02:54.513Z",
+          "hash": "0ca600b7548e6f5d9d86a9eff4a39ad4"
+        },
+        {
+          "path": "simple-lambda\\package.json",
+          "size": 123,
+          "modified": "2025-08-22T23:02:17.864Z",
+          "hash": "0c44d175e7fda5abd4df4e259f8ce550"
+        }
+      ]
+    },
+    {
+      "name": "README.md",
+      "files": [
+        {
+          "path": "apps\\web\\safemate\\README.md",
+          "size": 7423,
+          "modified": "2025-08-14T10:17:55.665Z",
+          "hash": "c200fedc2e7094aede285e6650596a1b"
+        },
+        {
+          "path": "documentation\\README.md",
+          "size": 1423,
+          "modified": "2025-08-23T00:19:59.024Z",
+          "hash": "958844173e6032853711726571dc72f1"
+        },
+        {
+          "path": "README.md",
+          "size": 23900,
+          "modified": "2025-08-23T00:19:59.027Z",
+          "hash": "64079352b89bd23538fedc95f32e4d0f"
+        }
+      ]
+    },
+    {
+      "name": "updated-permissions-policy.json",
+      "files": [
+        {
+          "path": "apps\\web\\safemate\\updated-permissions-policy.json",
+          "size": 1595,
+          "modified": "2025-08-14T10:17:55.956Z",
+          "hash": "ca137010057078dfbf3ced8f6d3a7ebf"
+        },
+        {
+          "path": "updated-permissions-policy.json",
+          "size": 2024,
+          "modified": "2025-08-15T06:28:06.332Z",
+          "hash": "4a21b7e54eddad2e85b156c457c7117a"
+        }
+      ]
+    },
+    {
+      "name": "index.js",
+      "files": [
+        {
+          "path": "index.js",
+          "size": 9353,
+          "modified": "2025-08-15T06:28:06.329Z",
+          "hash": "a8065000d9088a0805bdd51704abbfa4"
+        },
+        {
+          "path": "services\\consolidated-wallet-service\\index.js",
+          "size": 18338,
+          "modified": "2025-08-23T02:11:15.369Z",
+          "hash": "622470c15aaaabb1d2e60fca98fa3782"
+        },
+        {
+          "path": "services\\group-manager\\index.js",
+          "size": 70552,
+          "modified": "2025-08-20T05:23:30.677Z",
+          "hash": "142b11a017b4003fb9b14e9a61cd820c"
+        },
+        {
+          "path": "services\\hedera-service\\index.js",
+          "size": 51413,
+          "modified": "2025-08-22T10:29:22.138Z",
+          "hash": "05b5db827ab61d24bd57d333f2d53bce"
+        },
+        {
+          "path": "services\\post-confirmation-wallet-creator\\index.js",
+          "size": 2428,
+          "modified": "2025-08-14T10:17:56.173Z",
+          "hash": "ac3c6830c4d49fda9eb9faa94b340e92"
+        },
+        {
+          "path": "services\\safemate-directory-creator\\index.js",
+          "size": 23934,
+          "modified": "2025-08-20T05:41:14.341Z",
+          "hash": "fd1dc26c11a968e926b007b220756b0b"
+        },
+        {
+          "path": "services\\token-vault\\index.js",
+          "size": 18380,
+          "modified": "2025-08-20T05:23:52.234Z",
+          "hash": "dc37fbc07e8a4349ad8bdb4478656b26"
+        },
+        {
+          "path": "services\\ultimate-wallet-service\\index.js",
+          "size": 22323,
+          "modified": "2025-08-24T04:21:54.624Z",
+          "hash": "8177a814489fa90f18c19ca970350663"
+        },
+        {
+          "path": "services\\user-onboarding\\index.js",
+          "size": 8315,
+          "modified": "2025-08-22T07:56:10.159Z",
+          "hash": "b528415c94253f394b1dcd08de02656a"
+        },
+        {
+          "path": "services\\wallet-manager\\index.js",
+          "size": 13514,
+          "modified": "2025-08-20T05:24:01.499Z",
+          "hash": "0809e04e25a08c9e122a3f771f63febe"
+        },
+        {
+          "path": "simple-lambda\\index.js",
+          "size": 7231,
+          "modified": "2025-08-14T11:20:08.080Z",
+          "hash": "a9d27188890c73183e2c12921ac8bde3"
+        }
+      ]
+    },
+    {
+      "name": "response.json",
+      "files": [
+        {
+          "path": "response.json",
+          "size": 625,
+          "modified": "2025-08-18T00:40:06.377Z",
+          "hash": "4f10e75c7a7100f08e7bac68c9fd8775"
+        },
+        {
+          "path": "terraform\\response.json",
+          "size": 897,
+          "modified": "2025-08-14T11:20:08.107Z",
+          "hash": "ac9f40ccaced2855ffe3cc7d6b63fd69"
+        }
+      ]
+    },
+    {
+      "name": "index-simple.js",
+      "files": [
+        {
+          "path": "services\\ultimate-wallet-service\\index-simple.js",
+          "size": 3070,
+          "modified": "2025-08-23T06:18:34.577Z",
+          "hash": "622f9a7fe59291082836d5df3b5b362f"
+        },
+        {
+          "path": "services\\user-onboarding\\index-simple.js",
+          "size": 7939,
+          "modified": "2025-08-22T00:44:19.741Z",
+          "hash": "463fb4a735205c259c93bcdf49f60879"
+        }
+      ]
+    },
+    {
+      "name": "test-lambda-payload.json",
+      "files": [
+        {
+          "path": "services\\user-onboarding\\test-lambda-payload.json",
+          "size": 357,
+          "modified": "2025-08-22T00:21:51.202Z",
+          "hash": "c0b877ce750463652dfea717663675a3"
+        },
+        {
+          "path": "test-lambda-payload.json",
+          "size": 161,
+          "modified": "2025-08-23T09:53:19.635Z",
+          "hash": "928a3c43f7f080191b043fe2dbd89650"
+        },
+        {
+          "path": "tests\\terraform\\test-lambda-payload.json",
+          "size": 111,
+          "modified": "2025-08-20T23:19:53.760Z",
+          "hash": "a1035e92cfdb730aa39251130a9d8dba"
+        }
+      ]
+    },
+    {
+      "name": "test-payload.json",
+      "files": [
+        {
+          "path": "services\\user-onboarding\\test-payload.json",
+          "size": 217,
+          "modified": "2025-08-22T07:50:12.587Z",
+          "hash": "1279fae2445b3b2969c601ea438eea1c"
+        },
+        {
+          "path": "test-payload.json",
+          "size": 92,
+          "modified": "2025-08-24T02:30:24.851Z",
+          "hash": "bfe1879973fff191f7554679233117f2"
+        },
+        {
+          "path": "tests\\api\\test-payload.json",
+          "size": 474,
+          "modified": "2025-08-20T07:12:34.339Z",
+          "hash": "de349d14ebecc0614438a2ee90d88143"
+        },
+        {
+          "path": "tests\\terraform\\test-payload.json",
+          "size": 208,
+          "modified": "2025-08-20T23:19:53.889Z",
+          "hash": "389bbfa205f20c1d86e8afb16692acd5"
+        }
+      ]
+    },
+    {
+      "name": "test-lambda-direct.js",
+      "files": [
+        {
+          "path": "test-lambda-direct.js",
+          "size": 1500,
+          "modified": "2025-08-23T23:53:54.781Z",
+          "hash": "c1fa5ea3d5b86e11559c38e497f8a058"
+        },
+        {
+          "path": "tests\\api\\test-lambda-direct.js",
+          "size": 1419,
+          "modified": "2025-08-20T23:19:48.882Z",
+          "hash": "e4c83d71abb0e019b984010ce4cfc35f"
+        }
+      ]
+    },
+    {
+      "name": "test-lambda.json",
+      "files": [
+        {
+          "path": "test-lambda.json",
+          "size": 53,
+          "modified": "2025-08-23T13:46:20.622Z",
+          "hash": "c798c436bc45062fa1e2b3178bf51edb"
+        },
+        {
+          "path": "tests\\api\\test-lambda.json",
+          "size": 213,
+          "modified": "2025-08-20T23:19:45.509Z",
+          "hash": "5b3a0f784221ad80c89fedbed0145c0a"
+        }
+      ]
+    },
+    {
+      "name": "test-response.json",
+      "files": [
+        {
+          "path": "test-response.json",
+          "size": 425,
+          "modified": "2025-08-24T03:16:35.287Z",
+          "hash": "d9495ec209cdb9646344c92e4e0e665b"
+        },
+        {
+          "path": "tests\\terraform\\test-response.json",
+          "size": 1111,
+          "modified": "2025-08-20T23:19:53.949Z",
+          "hash": "5681584b6be674507bb11bb9b07aad06"
+        }
+      ]
+    },
+    {
+      "name": "test-simple.json",
+      "files": [
+        {
+          "path": "test-simple.json",
+          "size": 221,
+          "modified": "2025-08-23T13:21:07.676Z",
+          "hash": "4d7a07be54d502e10cb01f91e132511d"
+        },
+        {
+          "path": "tests\\terraform\\test-simple.json",
+          "size": 198,
+          "modified": "2025-08-20T23:19:53.992Z",
+          "hash": "78656e13e6d179e35d07194f2a6fd95f"
+        }
+      ]
+    }
+  ]
+}

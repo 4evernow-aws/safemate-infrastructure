@@ -1,0 +1,1 @@
+{"httpMethod":"POST","path":"/onboarding/start","body":"{\"action\":\"start\"}","headers":{"Content-Type":"application/json"},"requestContext":{"authorizer":{"claims":{"sub":"test-user-id","email":"test@example.com"}}}}

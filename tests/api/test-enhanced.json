@@ -1,0 +1,12 @@
+{
+  "httpMethod": "POST",
+  "path": "/folders",
+  "body": "{\"name\":\"Enhanced Test\"}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "test-user-123"
+      }
+    }
+  }
+}
