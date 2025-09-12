@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMate Network Architecture Diagrams</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-left: 4px solid #3498db;
+        }
+        .diagram-container {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .description {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+        }
+        .nav {
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        .nav a:hover {
+            background-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 SafeMate Network Architecture Diagrams</h1>
+        
+        <div class="nav">
+            <a href="#network-flow">Network Flow</a>
+            <a href="#security">Security Architecture</a>
+            <a href="#data-flow">Data Flow</a>
+            <a href="#infrastructure">Infrastructure as Code</a>
+            <a href="#monitoring">Monitoring & Observability</a>
+        </div>
+
+        <div id="network-flow" class="diagram-container">
+            <h2>🌐 Network Flow Architecture</h2>
+            <div class="description">
+                This diagram shows the complete network flow from end users through the CDN, security layers, load balancers, and into the VPC with all three environments.
+            </div>
+            <div class="mermaid">
+graph TB
+    subgraph "Internet"
+        USERS[👥 End Users]
+        DEVELOPERS[👨‍💻 Developers]
+        ADMIN[🔧 Administrators]
+    end
+    
+    subgraph "CDN Layer"
+        CLOUDFRONT[CloudFront CDN<br/>Global Distribution]
+    end
+    
+    subgraph "Security Layer"
+        WAF[Web Application Firewall<br/>DDoS Protection]
+        SHIELD[AWS Shield<br/>Advanced Protection]
+    end
+    
+    subgraph "Load Balancer"
+        ALB[Application Load Balancer<br/>Traffic Distribution]
+    end
+    
+    subgraph "VPC - us-east-1"
+        subgraph "Public Subnets"
+            NAT[NAT Gateway<br/>Outbound Internet Access]
+        end
+        
+        subgraph "Private Subnets"
+            subgraph "Development Environment"
+                DEV_LAMBDA[Lambda Functions<br/>dev-safemate-*]
+                DEV_API[API Gateway<br/>dev-api.safemate.com]
+            end
+            
+            subgraph "Pre-Production Environment"
+                PREPROD_LAMBDA[Lambda Functions<br/>preprod-safemate-*]
+                PREPROD_API[API Gateway<br/>preprod-api.safemate.com]
+            end
+            
+            subgraph "Production Environment"
+                PROD_LAMBDA[Lambda Functions<br/>prod-safemate-*]
+                PROD_API[API Gateway<br/>prod-api.safemate.com]
+            end
+        end
+        
+        subgraph "Data Layer"
+            subgraph "Development Data"
+                DEV_DB[DynamoDB<br/>dev-safemate-wallets]
+                DEV_S3[S3 Bucket<br/>dev-safemate-assets]
+            end
+            
+            subgraph "Pre-Production Data"
+                PREPROD_DB[DynamoDB<br/>preprod-safemate-wallets]
+                PREPROD_S3[S3 Bucket<br/>preprod-safemate-assets]
+            end
+            
+            subgraph "Production Data"
+                PROD_DB[DynamoDB<br/>prod-safemate-wallets]
+                PROD_S3[S3 Bucket<br/>prod-safemate-assets]
+            end
+        end
+        
+        subgraph "Security Services"
+            KMS[KMS<br/>Key Management]
+            SECRETS[Secrets Manager<br/>Configuration]
+            COGNITO[Cognito<br/>User Authentication]
+        end
+    end
+    
+    subgraph "External Services"
+        HEDERA[Hedera Network<br/>Blockchain Integration]
+        MONITORING[CloudWatch<br/>Monitoring & Logging]
+    end
+    
+    %% User traffic flow
+    USERS --> CLOUDFRONT
+    DEVELOPERS --> DEV_API
+    ADMIN --> PROD_API
+    
+    %% Security flow
+    CLOUDFRONT --> WAF
+    WAF --> SHIELD
+    SHIELD --> ALB
+    
+    %% Internal flow
+    ALB --> NAT
+    NAT --> DEV_LAMBDA
+    NAT --> PREPROD_LAMBDA
+    NAT --> PROD_LAMBDA
+    
+    %% Data connections
+    DEV_LAMBDA --> DEV_DB
+    DEV_LAMBDA --> DEV_S3
+    PREPROD_LAMBDA --> PREPROD_DB
+    PREPROD_LAMBDA --> PREPROD_S3
+    PROD_LAMBDA --> PROD_DB
+    PROD_LAMBDA --> PROD_S3
+    
+    %% Security connections
+    DEV_LAMBDA --> KMS
+    DEV_LAMBDA --> SECRETS
+    DEV_LAMBDA --> COGNITO
+    PREPROD_LAMBDA --> KMS
+    PREPROD_LAMBDA --> SECRETS
+    PREPROD_LAMBDA --> COGNITO
+    PROD_LAMBDA --> KMS
+    PROD_LAMBDA --> SECRETS
+    PROD_LAMBDA --> COGNITO
+    
+    %% External connections
+    DEV_LAMBDA --> HEDERA
+    PREPROD_LAMBDA --> HEDERA
+    PROD_LAMBDA --> HEDERA
+    
+    %% Monitoring
+    DEV_LAMBDA --> MONITORING
+    PREPROD_LAMBDA --> MONITORING
+    PROD_LAMBDA --> MONITORING
+            </div>
+        </div>
+
+        <div id="security" class="diagram-container">
+            <h2>🔒 Security Architecture Detail</h2>
+            <div class="description">
+                Detailed view of the multi-layered security architecture including perimeter, network, application, and data security layers.
+            </div>
+            <div class="mermaid">
+graph TB
+    subgraph "Security Layers"
+        subgraph "Perimeter Security"
+            CLOUDFRONT_SEC[CloudFront<br/>DDoS Protection<br/>Geographic Restrictions]
+            WAF_SEC[WAF<br/>SQL Injection Protection<br/>XSS Protection<br/>Rate Limiting]
+            SHIELD_SEC[AWS Shield<br/>Advanced DDoS Protection<br/>24/7 Support]
+        end
+        
+        subgraph "Network Security"
+            VPC_SEC[VPC<br/>Isolated Network<br/>Custom IP Ranges]
+            SG_SEC[Security Groups<br/>Port-based Access Control<br/>Source IP Restrictions]
+            NACL_SEC[Network ACLs<br/>Subnet-level Security<br/>Stateless Filtering]
+        end
+        
+        subgraph "Application Security"
+            IAM_SEC[IAM<br/>Role-based Access<br/>Least Privilege]
+            MFA_SEC[Multi-Factor Authentication<br/>Hardware Tokens<br/>SMS/Email]
+            COGNITO_SEC[Cognito<br/>User Authentication<br/>OAuth Integration]
+        end
+        
+        subgraph "Data Security"
+            KMS_SEC[KMS<br/>Encryption Keys<br/>Key Rotation]
+            SECRETS_SEC[Secrets Manager<br/>Secure Storage<br/>Automatic Rotation]
+            BACKUP_SEC[Encrypted Backups<br/>Cross-region Replication<br/>Retention Policies]
+        end
+        
+        subgraph "Monitoring & Compliance"
+            CLOUDTRAIL_SEC[CloudTrail<br/>API Call Logging<br/>Compliance Auditing]
+            GUARDDUTY_SEC[GuardDuty<br/>Threat Detection<br/>Machine Learning]
+            CONFIG_SEC[AWS Config<br/>Resource Compliance<br/>Change Tracking]
+        end
+    end
+    
+    subgraph "Environment Security Levels"
+        subgraph "Development"
+            DEV_SEC_LEVEL[Basic Security<br/>Developer Access<br/>Test Data Only]
+        end
+        
+        subgraph "Pre-Production"
+            PREPROD_SEC_LEVEL[Enhanced Security<br/>Team Access<br/>Production-like Data]
+        end
+        
+        subgraph "Production"
+            PROD_SEC_LEVEL[Enterprise Security<br/>Restricted Access<br/>Real User Data]
+        end
+    end
+    
+    %% Security flow
+    CLOUDFRONT_SEC --> WAF_SEC
+    WAF_SEC --> SHIELD_SEC
+    SHIELD_SEC --> VPC_SEC
+    VPC_SEC --> SG_SEC
+    SG_SEC --> NACL_SEC
+    NACL_SEC --> IAM_SEC
+    IAM_SEC --> MFA_SEC
+    MFA_SEC --> COGNITO_SEC
+    COGNITO_SEC --> KMS_SEC
+    KMS_SEC --> SECRETS_SEC
+    SECRETS_SEC --> BACKUP_SEC
+    BACKUP_SEC --> CLOUDTRAIL_SEC
+    CLOUDTRAIL_SEC --> GUARDDUTY_SEC
+    GUARDDUTY_SEC --> CONFIG_SEC
+    
+    %% Environment security
+    CONFIG_SEC --> DEV_SEC_LEVEL
+    CONFIG_SEC --> PREPROD_SEC_LEVEL
+    CONFIG_SEC --> PROD_SEC_LEVEL
+            </div>
+        </div>
+
+        <div id="data-flow" class="diagram-container">
+            <h2>🔄 Data Flow Architecture</h2>
+            <div class="description">
+                This diagram illustrates how data flows through the application layers, from user interface to external services and monitoring.
+            </div>
+            <div class="mermaid">
+flowchart TD
+    subgraph "User Interface Layer"
+        WEB[Web Application<br/>React/Vite]
+        MOBILE[Mobile Application<br/>React Native]
+        API_CLIENT[API Client<br/>REST/GraphQL]
+    end
+    
+    subgraph "API Gateway Layer"
+        API_GW[API Gateway<br/>Request Routing<br/>Authentication<br/>Rate Limiting]
+    end
+    
+    subgraph "Application Layer"
+        subgraph "Lambda Functions"
+            AUTH[Authentication Lambda<br/>User Verification]
+            WALLET[Wallet Management Lambda<br/>Hedera Integration]
+            TRANSACTION[Transaction Lambda<br/>Blockchain Operations]
+            NOTIFICATION[Notification Lambda<br/>User Alerts]
+        end
+    end
+    
+    subgraph "Data Layer"
+        subgraph "Primary Storage"
+            DYNAMODB[DynamoDB<br/>User Data<br/>Wallet Information<br/>Transaction History]
+        end
+        
+        subgraph "File Storage"
+            S3[S3 Bucket<br/>User Files<br/>Application Assets<br/>Backups]
+        end
+        
+        subgraph "Configuration"
+            SECRETS[Secrets Manager<br/>API Keys<br/>Database Credentials<br/>Environment Variables]
+        end
+    end
+    
+    subgraph "External Services"
+        HEDERA_NETWORK[Hedera Network<br/>Blockchain Operations<br/>Smart Contracts]
+        EMAIL_SERVICE[Email Service<br/>User Notifications<br/>System Alerts]
+        SMS_SERVICE[SMS Service<br/>Two-Factor Authentication<br/>Alerts]
+    end
+    
+    subgraph "Monitoring & Logging"
+        CLOUDWATCH[CloudWatch<br/>Application Metrics<br/>Error Logging<br/>Performance Monitoring]
+        XRAY[X-Ray<br/>Distributed Tracing<br/>Request Tracking]
+    end
+    
+    %% Data flow
+    WEB --> API_GW
+    MOBILE --> API_GW
+    API_CLIENT --> API_GW
+    
+    API_GW --> AUTH
+    API_GW --> WALLET
+    API_GW --> TRANSACTION
+    API_GW --> NOTIFICATION
+    
+    AUTH --> DYNAMODB
+    AUTH --> SECRETS
+    WALLET --> DYNAMODB
+    WALLET --> HEDERA_NETWORK
+    TRANSACTION --> DYNAMODB
+    TRANSACTION --> HEDERA_NETWORK
+    NOTIFICATION --> EMAIL_SERVICE
+    NOTIFICATION --> SMS_SERVICE
+    
+    WALLET --> S3
+    TRANSACTION --> S3
+    
+    AUTH --> CLOUDWATCH
+    WALLET --> CLOUDWATCH
+    TRANSACTION --> CLOUDWATCH
+    NOTIFICATION --> CLOUDWATCH
+    
+    AUTH --> XRAY
+    WALLET --> XRAY
+    TRANSACTION --> XRAY
+            </div>
+        </div>
+
+        <div id="infrastructure" class="diagram-container">
+            <h2>🏗️ Infrastructure as Code Architecture</h2>
+            <div class="description">
+                This diagram shows how infrastructure is managed using Terraform with modular components and environment-specific configurations.
+            </div>
+            <div class="mermaid">
+graph TB
+    subgraph "Version Control"
+        GITHUB[GitHub Repository<br/>Source Code Management<br/>Branch Protection]
+    end
+    
+    subgraph "CI/CD Pipeline"
+        GITHUB_ACTIONS[GitHub Actions<br/>Automated Testing<br/>Build Process<br/>Deployment]
+    end
+    
+    subgraph "Infrastructure as Code"
+        TERRAFORM[Terraform<br/>Infrastructure Definition<br/>Resource Management<br/>State Management]
+        
+        subgraph "Terraform Modules"
+            NETWORK[Network Module<br/>VPC, Subnets, Security Groups]
+            COMPUTE[Compute Module<br/>Lambda Functions, API Gateway]
+            STORAGE[Storage Module<br/>DynamoDB, S3, KMS]
+            SECURITY[Security Module<br/>IAM, Cognito, Secrets Manager]
+            MONITORING[Monitoring Module<br/>CloudWatch, X-Ray, GuardDuty]
+        end
+    end
+    
+    subgraph "Environment Management"
+        subgraph "Development"
+            DEV_TERRAFORM[Development State<br/>dev.tfvars<br/>Local Backend]
+        end
+        
+        subgraph "Pre-Production"
+            PREPROD_TERRAFORM[Pre-Production State<br/>preprod.tfvars<br/>Remote Backend]
+        end
+        
+        subgraph "Production"
+            PROD_TERRAFORM[Production State<br/>prod.tfvars<br/>Remote Backend]
+        end
+    end
+    
+    subgraph "AWS Cloud"
+        AWS_RESOURCES[AWS Resources<br/>Infrastructure Deployment<br/>Resource Management]
+    end
+    
+    %% Flow
+    GITHUB --> GITHUB_ACTIONS
+    GITHUB_ACTIONS --> TERRAFORM
+    TERRAFORM --> NETWORK
+    TERRAFORM --> COMPUTE
+    TERRAFORM --> STORAGE
+    TERRAFORM --> SECURITY
+    TERRAFORM --> MONITORING
+    
+    NETWORK --> DEV_TERRAFORM
+    COMPUTE --> DEV_TERRAFORM
+    STORAGE --> DEV_TERRAFORM
+    SECURITY --> DEV_TERRAFORM
+    MONITORING --> DEV_TERRAFORM
+    
+    NETWORK --> PREPROD_TERRAFORM
+    COMPUTE --> PREPROD_TERRAFORM
+    STORAGE --> PREPROD_TERRAFORM
+    SECURITY --> PREPROD_TERRAFORM
+    MONITORING --> PREPROD_TERRAFORM
+    
+    NETWORK --> PROD_TERRAFORM
+    COMPUTE --> PROD_TERRAFORM
+    STORAGE --> PROD_TERRAFORM
+    SECURITY --> PROD_TERRAFORM
+    MONITORING --> PROD_TERRAFORM
+    
+    DEV_TERRAFORM --> AWS_RESOURCES
+    PREPROD_TERRAFORM --> AWS_RESOURCES
+    PROD_TERRAFORM --> AWS_RESOURCES
+            </div>
+        </div>
+
+        <div id="monitoring" class="diagram-container">
+            <h2>📊 Monitoring & Observability Architecture</h2>
+            <div class="description">
+                This diagram illustrates the comprehensive monitoring and observability architecture including data collection, alerting, and response systems.
+            </div>
+            <div class="mermaid">
+graph TB
+    subgraph "Application Layer"
+        LAMBDA[Lambda Functions<br/>Application Logic]
+        API[API Gateway<br/>Request Handling]
+    end
+    
+    subgraph "Data Collection"
+        CLOUDWATCH_LOGS[CloudWatch Logs<br/>Application Logs<br/>Error Logging]
+        CLOUDWATCH_METRICS[CloudWatch Metrics<br/>Performance Data<br/>Business Metrics]
+        XRAY_TRACES[X-Ray Traces<br/>Request Tracing<br/>Dependency Mapping]
+    end
+    
+    subgraph "Security Monitoring"
+        CLOUDTRAIL[CloudTrail<br/>API Call Logs<br/>Security Events]
+        GUARDDUTY[GuardDuty<br/>Threat Detection<br/>Anomaly Detection]
+        CONFIG[AWS Config<br/>Compliance Monitoring<br/>Resource Changes]
+    end
+    
+    subgraph "Alerting & Notification"
+        SNS[SNS Topics<br/>Alert Distribution<br/>Escalation]
+        LAMBDA_ALERTS[Alert Lambda<br/>Custom Alert Logic<br/>Business Rules]
+    end
+    
+    subgraph "Dashboards & Visualization"
+        CLOUDWATCH_DASH[CloudWatch Dashboards<br/>Real-time Monitoring<br/>Performance Views]
+        CUSTOM_DASH[Custom Dashboards<br/>Business Metrics<br/>KPI Tracking]
+    end
+    
+    subgraph "Response & Actions"
+        AUTO_SCALING[Auto Scaling<br/>Resource Management<br/>Performance Optimization]
+        INCIDENT_RESPONSE[Incident Response<br/>Automated Actions<br/>Manual Intervention]
+    end
+    
+    %% Monitoring flow
+    LAMBDA --> CLOUDWATCH_LOGS
+    LAMBDA --> CLOUDWATCH_METRICS
+    LAMBDA --> XRAY_TRACES
+    API --> CLOUDWATCH_LOGS
+    API --> CLOUDWATCH_METRICS
+    API --> XRAY_TRACES
+    
+    CLOUDWATCH_LOGS --> SNS
+    CLOUDWATCH_METRICS --> SNS
+    XRAY_TRACES --> SNS
+    
+    CLOUDTRAIL --> GUARDDUTY
+    GUARDDUTY --> CONFIG
+    CONFIG --> SNS
+    
+    SNS --> LAMBDA_ALERTS
+    LAMBDA_ALERTS --> CLOUDWATCH_DASH
+    LAMBDA_ALERTS --> CUSTOM_DASH
+    
+    CLOUDWATCH_DASH --> AUTO_SCALING
+    CUSTOM_DASH --> INCIDENT_RESPONSE
+    AUTO_SCALING --> INCIDENT_RESPONSE
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>SafeMate Network Architecture Diagrams</strong></p>
+            <p>These network architecture diagrams provide detailed visual representations of SafeMate's network infrastructure, security layers, data flow, and monitoring systems.</p>
+            <p>Last Updated: 2025-08-26</p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            },
+            themeVariables: {
+                primaryColor: '#3498db',
+                primaryTextColor: '#2c3e50',
+                primaryBorderColor: '#2980b9',
+                lineColor: '#34495e',
+                secondaryColor: '#ecf0f1',
+                tertiaryColor: '#bdc3c7'
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+﻿{
+  "Variables": {
+    "SAFEMATE_FILES_TABLE": "dev-safemate-files",
+    "USER_SECRETS_TABLE": "dev-safemate-user-secrets",
+    "HEDERA_TOKENS_TABLE": "dev-safemate-groups",
+    "HEDERA_NFTS_TABLE": "dev-safemate-group-activities",
+    "SAFEMATE_FOLDERS_TABLE": "dev-safemate-folders",
+    "COGNITO_USER_POOL_ID": "ap-southeast-2_2fMWFFs8i",
+    "OPERATOR_ACCOUNT_ID": "0.0.6428427",
+    "BLOCKCHAIN_AUDIT_TABLE": "dev-safemate-wallet-audit",
+    "WALLET_AUDIT_TABLE": "dev-safemate-wallet-audit",
+    "APP_SECRETS_KMS_KEY_ID": "9304f36f-da1d-43ca-a383-cf8d0c60e800",
+    "HEDERA_NETWORK": "testnet",
+    "OPERATOR_PRIVATE_KEY_KMS_KEY_ID": "9304f36f-da1d-43ca-a383-cf8d0c60e800",
+    "HEDERA_FOLDERS_TABLE": "dev-safemate-hedera-folders",
+    "WALLET_KMS_KEY_ID": "9304f36f-da1d-43ca-a383-cf8d0c60e800",
+    "WALLET_METADATA_TABLE": "dev-safemate-wallet-metadata",
+    "HEDERA_CONTRACTS_TABLE": "dev-safemate-shared-wallets",
+    "WALLET_KEYS_TABLE": "dev-safemate-wallet-keys"
+  }
+}

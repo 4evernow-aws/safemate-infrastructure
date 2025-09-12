@@ -1,0 +1,7 @@
+{
+  "name": "safemate-simple-lambda",
+  "version": "1.0.0",
+  "dependencies": {
+    "@hashgraph/sdk": "^2.71.1"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "httpMethod": "POST",
+  "path": "/onboarding/start",
+  "body": "{\"email\":\"test@example.com\"}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "test-user-123",
+        "email": "test@example.com"
+      }
+    }
+  }
+}

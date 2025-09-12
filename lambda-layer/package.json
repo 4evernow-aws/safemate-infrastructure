@@ -1,0 +1,14 @@
+{
+  "name": "safemate-hedera-layer",
+  "version": "1.0.0",
+  "description": "Lambda Layer for SafeMate Hedera integration",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-kms": "^3.0.0",
+    "@aws-sdk/client-secrets-manager": "^3.0.0",
+    "@aws-sdk/client-sso": "^3.0.0",
+    "@aws-sdk/core": "^3.0.0",
+    "@hashgraph/sdk": "^2.71.1",
+    "@smithy/util-middleware": "^2.2.0"
+  }
+}

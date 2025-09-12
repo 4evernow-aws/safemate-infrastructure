@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMate Environment Diagrams - Index</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .diagram-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .diagram-card {
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 25px;
+            background-color: #f8f9fa;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .diagram-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .diagram-card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .diagram-card p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .diagram-card .features {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .diagram-card .features ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .diagram-card .features li {
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+        .diagram-card .link {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+        .diagram-card .link:hover {
+            background-color: #2980b9;
+        }
+        .description {
+            background-color: #e8f4fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+        }
+        .back-link {
+            display: inline-block;
+            background-color: #34495e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        .back-link:hover {
+            background-color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../README.md" class="back-link">← Back to Environment Documentation</a>
+        
+        <h1>🌐 SafeMate Environment Diagrams</h1>
+        
+        <div class="description">
+            <h3>Welcome to the SafeMate Environment Diagrams</h3>
+            <p>This collection provides comprehensive visual representations of SafeMate's environment architecture, deployment processes, and infrastructure design. Each diagram is interactive and can be viewed in any modern web browser.</p>
+            <p><strong>Features:</strong></p>
+            <ul>
+                <li>🔍 <strong>Interactive Navigation</strong> - Click through different sections within each diagram</li>
+                <li>📱 <strong>Responsive Design</strong> - View diagrams on desktop, tablet, or mobile devices</li>
+                <li>🎨 <strong>Professional Styling</strong> - Clean, modern interface with consistent branding</li>
+                <li>📊 <strong>Mermaid Diagrams</strong> - Rendered using the latest Mermaid.js library</li>
+                <li>🔗 <strong>Cross-References</strong> - Links between related diagrams and documentation</li>
+            </ul>
+        </div>
+
+        <div class="diagram-grid">
+            <a href="environment-architecture.html" class="diagram-card">
+                <h3>🌍 Environment Architecture</h3>
+                <p>Comprehensive overview of SafeMate's multi-environment architecture including development, pre-production, and production environments.</p>
+                <div class="features">
+                    <strong>Includes:</strong>
+                    <ul>
+                        <li>Environment Overview Diagram</li>
+                        <li>Deployment Flow</li>
+                        <li>Configuration Management</li>
+                        <li>AWS Resource Architecture</li>
+                        <li>Environment Lifecycle</li>
+                        <li>Security Architecture</li>
+                        <li>Cost Management</li>
+                        <li>Troubleshooting Flow</li>
+                        <li>Deployment Checklist</li>
+                    </ul>
+                </div>
+                <span class="link">View Environment Architecture →</span>
+            </a>
+
+            <a href="quick-reference.html" class="diagram-card">
+                <h3>🎯 Quick Reference</h3>
+                <p>Essential information and quick commands for daily operations across all SafeMate environments.</p>
+                <div class="features">
+                    <strong>Includes:</strong>
+                    <ul>
+                        <li>Environment Summary</li>
+                        <li>Deployment Commands</li>
+                        <li>Configuration Files</li>
+                        <li>Environment Variables</li>
+                        <li>Security Levels</li>
+                        <li>Cost Breakdown</li>
+                        <li>Resource Comparison</li>
+                        <li>Deployment Flow</li>
+                        <li>Emergency Contacts</li>
+                        <li>Quick Commands</li>
+                        <li>Key URLs</li>
+                    </ul>
+                </div>
+                <span class="link">View Quick Reference →</span>
+            </a>
+
+            <a href="network-architecture.html" class="diagram-card">
+                <h3>🌐 Network Architecture</h3>
+                <p>Detailed network infrastructure diagrams showing security layers, data flow, and monitoring systems.</p>
+                <div class="features">
+                    <strong>Includes:</strong>
+                    <ul>
+                        <li>Network Flow Architecture</li>
+                        <li>Security Architecture Detail</li>
+                        <li>Data Flow Architecture</li>
+                        <li>Infrastructure as Code</li>
+                        <li>Monitoring & Observability</li>
+                    </ul>
+                </div>
+                <span class="link">View Network Architecture →</span>
+            </a>
+        </div>
+
+        <div class="description">
+            <h3>📋 How to Use These Diagrams</h3>
+            <p><strong>For Developers:</strong> Start with the Quick Reference for daily commands, then explore the Environment Architecture for understanding the overall system design.</p>
+            <p><strong>For DevOps:</strong> Focus on the Network Architecture for infrastructure details and the Environment Architecture for deployment processes.</p>
+            <p><strong>For Management:</strong> Review the Quick Reference for cost breakdowns and the Environment Architecture for security and lifecycle information.</p>
+        </div>
+
+        <div class="footer">
+            <p><strong>SafeMate Environment Diagrams</strong></p>
+            <p>These diagrams provide comprehensive visual representations of SafeMate's environment architecture, deployment processes, and infrastructure design.</p>
+            <p>Last Updated: 2025-08-26</p>
+        </div>
+    </div>
+</body>
+</html>

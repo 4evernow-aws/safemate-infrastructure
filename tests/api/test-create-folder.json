@@ -1,0 +1,12 @@
+{
+  "httpMethod": "POST",
+  "path": "/folders",
+  "body": "{\"name\":\"Test Folder\",\"parentFolderId\":null}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "test-user-123"
+      }
+    }
+  }
+}

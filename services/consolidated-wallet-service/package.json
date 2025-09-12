@@ -1,0 +1,38 @@
+{
+  "name": "consolidated-wallet-service",
+  "version": "2.0.0",
+  "description": "SafeMate Consolidated Wallet Service - Unified wallet operations for Hedera integration",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"No build step required\"",
+    "deploy": "zip -r consolidated-wallet-service.zip . -x node_modules/\\* .git/\\* tests/\\* \\*.test.js \\*.md"
+  },
+  "keywords": [
+    "safemate",
+    "hedera",
+    "wallet",
+    "blockchain",
+    "aws",
+    "lambda"
+  ],
+  "author": "SafeMate Development Team",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/lib-dynamodb": "^3.450.0",
+    "@aws-sdk/client-kms": "^3.450.0",
+    "@hashgraph/sdk": "^2.71.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/safemate/safemate_v2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/safemate/safemate_v2/issues"
+  },
+  "homepage": "https://github.com/safemate/safemate_v2#readme"
+}

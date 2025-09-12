@@ -1,0 +1,8 @@
+{
+  "httpMethod": "POST",
+  "path": "/onboarding/start",
+  "body": "{\"user_id\":\"test-user-production\",\"email\":\"test@example.com\"}",
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}

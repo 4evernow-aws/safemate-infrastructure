@@ -1,0 +1,92 @@
+﻿{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Errors", "FunctionName", "default-safemate-hedera-service"],
+          ["AWS/Lambda", "Errors", "FunctionName", "default-safemate-token-vault"],
+          ["AWS/Lambda", "Errors", "FunctionName", "default-safemate-user-onboarding"],
+          ["AWS/Lambda", "Errors", "FunctionName", "default-safemate-wallet-manager"],
+          ["AWS/Lambda", "Errors", "FunctionName", "default-safemate-directory-creator"],
+          ["AWS/Lambda", "Errors", "FunctionName", "default-safemate-group-manager"]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "ap-southeast-2",
+        "title": "SafeMate Lambda Functions - Error Rate",
+        "period": 300
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Duration", "FunctionName", "default-safemate-hedera-service"],
+          ["AWS/Lambda", "Duration", "FunctionName", "default-safemate-token-vault"],
+          ["AWS/Lambda", "Duration", "FunctionName", "default-safemate-user-onboarding"],
+          ["AWS/Lambda", "Duration", "FunctionName", "default-safemate-wallet-manager"],
+          ["AWS/Lambda", "Duration", "FunctionName", "default-safemate-directory-creator"],
+          ["AWS/Lambda", "Duration", "FunctionName", "default-safemate-group-manager"]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "ap-southeast-2",
+        "title": "SafeMate Lambda Functions - Duration (ms)",
+        "period": 300
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 6,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Invocations", "FunctionName", "default-safemate-hedera-service"],
+          ["AWS/Lambda", "Invocations", "FunctionName", "default-safemate-token-vault"],
+          ["AWS/Lambda", "Invocations", "FunctionName", "default-safemate-user-onboarding"],
+          ["AWS/Lambda", "Invocations", "FunctionName", "default-safemate-wallet-manager"],
+          ["AWS/Lambda", "Invocations", "FunctionName", "default-safemate-directory-creator"],
+          ["AWS/Lambda", "Invocations", "FunctionName", "default-safemate-group-manager"]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "ap-southeast-2",
+        "title": "SafeMate Lambda Functions - Invocations",
+        "period": 300
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 6,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Throttles", "FunctionName", "default-safemate-hedera-service"],
+          ["AWS/Lambda", "Throttles", "FunctionName", "default-safemate-token-vault"],
+          ["AWS/Lambda", "Throttles", "FunctionName", "default-safemate-user-onboarding"],
+          ["AWS/Lambda", "Throttles", "FunctionName", "default-safemate-wallet-manager"],
+          ["AWS/Lambda", "Throttles", "FunctionName", "default-safemate-directory-creator"],
+          ["AWS/Lambda", "Throttles", "FunctionName", "default-safemate-group-manager"]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "ap-southeast-2",
+        "title": "SafeMate Lambda Functions - Throttles",
+        "period": 300
+      }
+    }
+  ]
+}
