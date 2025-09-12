@@ -1,0 +1,115 @@
+name: Deploy SafeMate Environments
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - preprod
+      - prod
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - preprod
+          - prod
+
+env:
+  AWS_REGION: ap-southeast-2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.5.0"
+        
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: Determine environment
+      id: env
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+        elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "environment=prod" >> $GITHUB_OUTPUT
+        elif [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+          echo "environment=dev" >> $GITHUB_OUTPUT
+        elif [ "${{ github.ref }}" = "refs/heads/preprod" ]; then
+          echo "environment=preprod" >> $GITHUB_OUTPUT
+        elif [ "${{ github.ref }}" = "refs/heads/prod" ]; then
+          echo "environment=prod" >> $GITHUB_OUTPUT
+        else
+          echo "environment=dev" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Deploy to ${{ steps.env.outputs.environment }}
+      run: |
+        cd terraform
+        
+        # Set environment variable
+        export TF_VAR_environment="${{ steps.env.outputs.environment }}"
+        
+        # Initialize Terraform
+        terraform init
+        
+        # Plan deployment
+        terraform plan -var-file="${{ steps.env.outputs.environment }}.tfvars" -out="${{ steps.env.outputs.environment }}-plan.out"
+        
+        # Apply deployment
+        terraform apply -auto-approve "${{ steps.env.outputs.environment }}-plan.out"
+        
+    - name: Get deployment outputs
+      run: |
+        cd terraform
+        terraform output -json > outputs.json
+        
+    - name: Comment deployment results
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const outputs = JSON.parse(fs.readFileSync('terraform/outputs.json', 'utf8'));
+          
+          let comment = `## 🚀 SafeMate ${{ steps.env.outputs.environment }} Deployment Complete!\n\n`;
+          comment += `**Environment:** ${{ steps.env.outputs.environment }}\n`;
+          comment += `**Deployed by:** @${{ github.actor }}\n`;
+          comment += `**Commit:** ${{ github.sha }}\n\n`;
+          
+          comment += `### 🌐 API Endpoints:\n`;
+          Object.keys(outputs).forEach(key => {
+            if (key.includes('_api_url')) {
+              comment += `- **${key}:** ${outputs[key].value}\n`;
+            }
+          });
+          
+          comment += `\n### 📊 Environment Info:\n`;
+          if (outputs.environment_info) {
+            const envInfo = outputs.environment_info.value;
+            comment += `- **Environment:** ${envInfo.environment}\n`;
+            comment += `- **Hedera Network:** ${envInfo.hedera_network}\n`;
+            comment += `- **Debug Mode:** ${envInfo.debug_mode}\n`;
+            comment += `- **Demo Mode:** ${envInfo.demo_mode}\n`;
+          }
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

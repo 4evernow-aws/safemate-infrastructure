@@ -1,0 +1,16 @@
+{
+  "httpMethod": "POST",
+  "path": "/folders",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer test-token"
+  },
+  "body": "{\"name\":\"Enhanced Blockchain Test Folder\"}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "test-user-enhanced-blockchain"
+      }
+    }
+  }
+}

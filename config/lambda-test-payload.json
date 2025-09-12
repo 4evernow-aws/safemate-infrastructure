@@ -1,0 +1,9 @@
+﻿{
+    "body":  null,
+    "path":  "/folders",
+    "queryStringParameters":  null,
+    "headers":  {
+                    "Content-Type":  "application/json"
+                },
+    "httpMethod":  "GET"
+}

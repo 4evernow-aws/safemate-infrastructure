@@ -1,0 +1,215 @@
+# SafeMate Security & Secret Management
+# This file prevents sensitive data from being committed to the repository
+
+# ===========================================
+# CRITICAL: AWS Credentials & Secrets
+# ===========================================
+# AWS Access Keys (never commit these!)
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+
+# AWS Credentials
+.aws/
+aws-credentials.json
+aws-config.json
+credentials
+config
+
+# Environment Variables with Secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+.env.preprod
+*.env
+!*.env.example
+
+# ===========================================
+# API Keys & Tokens
+# ===========================================
+# API Keys
+api-keys.json
+secrets.json
+tokens.json
+auth-tokens.json
+
+# JWT Secrets
+jwt-secret.txt
+jwt-keys.json
+
+# Database Credentials
+db-credentials.json
+database-config.json
+
+# ===========================================
+# Blockchain & Crypto
+# ===========================================
+# Hedera Private Keys
+hedera-keys.json
+hedera-credentials.json
+operator-keys.json
+wallet-keys.json
+
+# Private Keys
+private-keys/
+*.private
+*.secret
+
+# ===========================================
+# Development & Build
+# ===========================================
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.vuepress/dist
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# ===========================================
+# IDE & Editor
+# ===========================================
+# VSCode
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ===========================================
+# OS Generated Files
+# ===========================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ===========================================
+# Logs & Temporary Files
+# ===========================================
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# ===========================================
+# Terraform
+# ===========================================
+# Terraform state files
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.*
+
+# Terraform variables with secrets
+terraform.tfvars
+*.auto.tfvars
+!*.auto.tfvars.example
+
+# ===========================================
+# Lambda & AWS
+# ===========================================
+# Lambda deployment packages
+*.zip
+lambda-*.zip
+deployment-*.zip
+
+# AWS SAM
+.aws-sam/
+samconfig.toml
+
+# ===========================================
+# Testing
+# ===========================================
+# Test results
+test-results/
+coverage/
+.nyc_output/
+
+# ===========================================
+# Backup Files
+# ===========================================
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.swp
+*.tmp
+
+# ===========================================
+# Documentation with Secrets
+# ===========================================
+# Remove any documentation that might contain secrets
+# (This is a safety measure - review before committing)
+docs/archive/SAFEMATE_PROJECT_DOCUMENTATION.md
+
+# ===========================================
+# Custom SafeMate Exclusions
+# ===========================================
+# Migration backups
+migration-*/
+backups/
+
+# Temporary files
+temp/
+tmp/
+.temp/
+
+# Local development files
+local-config.json
+dev-config.json

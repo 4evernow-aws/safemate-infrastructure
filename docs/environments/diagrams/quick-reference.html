@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMate Environment Quick Reference</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-left: 4px solid #3498db;
+        }
+        .diagram-container {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .description {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+        }
+        .nav {
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        .nav a:hover {
+            background-color: #3498db;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .file-structure {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+        .environment-card {
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            background-color: #f8f9fa;
+        }
+        .environment-card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 SafeMate Environment Quick Reference</h1>
+        
+        <div class="nav">
+            <a href="#summary">Environment Summary</a>
+            <a href="#deployment">Deployment Commands</a>
+            <a href="#configuration">Configuration Files</a>
+            <a href="#variables">Environment Variables</a>
+            <a href="#security">Security Levels</a>
+            <a href="#cost">Cost Breakdown</a>
+            <a href="#resources">Resource Comparison</a>
+            <a href="#flow">Deployment Flow</a>
+            <a href="#contacts">Emergency Contacts</a>
+            <a href="#commands">Quick Commands</a>
+            <a href="#urls">Key URLs</a>
+        </div>
+
+        <div id="summary" class="diagram-container">
+            <h2>🎯 Environment Summary</h2>
+            <div class="description">
+                Overview of all SafeMate environments with their key characteristics, URLs, and cost profiles.
+            </div>
+            <div class="mermaid">
+graph LR
+    subgraph "SafeMate Environments"
+        subgraph "Development"
+            DEV[🖥️ Development<br/>http://localhost:5173<br/>Free Tier $0.00/month<br/>Debug: ✅ Demo: ✅<br/>Hedera: Testnet]
+        end
+        
+        subgraph "Pre-Production"
+            PREPROD[🧪 Pre-Production<br/>https://d19a5c2wn4mtdt.cloudfront.net<br/>Low Cost ~$5-10/month<br/>Debug: ❌ Demo: ❌<br/>Hedera: Testnet]
+        end
+        
+        subgraph "Production"
+            PROD[🌐 Production<br/>https://prod.safemate.com<br/>(TBD - Documented Only)<br/>Standard ~$20-50/month<br/>Debug: ❌ Demo: ❌<br/>Hedera: Mainnet]
+        end
+    end
+    
+    DEV --> PREPROD
+    PREPROD --> PROD
+            </div>
+        </div>
+
+        <div id="deployment" class="diagram-container">
+            <h2>🚀 Deployment Commands</h2>
+            <div class="description">
+                Quick reference for deployment commands across all environments.
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Environment</th>
+                        <th>Command</th>
+                        <th>Branch</th>
+                        <th>Approval Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Development</strong></td>
+                        <td><code>.\deploy-dev.ps1</code></td>
+                        <td><code>dev</code></td>
+                        <td>❌ No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pre-Production</strong></td>
+                        <td><code>.\deploy-preprod.ps1</code></td>
+                        <td><code>preprod</code></td>
+                        <td>❌ No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Production</strong></td>
+                        <td><code>.\deploy-prod.ps1</code></td>
+                        <td><code>prod</code></td>
+                        <td>✅ Yes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="configuration" class="diagram-container">
+            <h2>📁 Configuration Files</h2>
+            <div class="description">
+                File structure for environment-specific configurations.
+            </div>
+            <div class="file-structure">
+terraform/
+├── variables.tf          # Global settings
+├── environments.tf       # Environment detection
+├── dev.tfvars           # Development config
+├── preprod.tfvars       # Pre-production config
+└── prod.tfvars          # Production config
+
+apps/web/safemate/
+├── .env.development     # Frontend dev config
+├── .env.staging         # Frontend staging config
+└── .env.production      # Frontend production config
+            </div>
+        </div>
+
+        <div id="variables" class="diagram-container">
+            <h2>🔧 Environment Variables</h2>
+            <div class="description">
+                Key environment variables and their values across different environments.
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Development</th>
+                        <th>Pre-Production</th>
+                        <th>Production</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>HEDERA_NETWORK</code></td>
+                        <td><code>testnet</code></td>
+                        <td><code>testnet</code></td>
+                        <td><code>mainnet</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>DEBUG_MODE</code></td>
+                        <td><code>true</code></td>
+                        <td><code>false</code></td>
+                        <td><code>false</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>DEMO_MODE</code></td>
+                        <td><code>true</code></td>
+                        <td><code>false</code></td>
+                        <td><code>false</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>LOG_LEVEL</code></td>
+                        <td><code>DEBUG</code></td>
+                        <td><code>INFO</code></td>
+                        <td><code>WARN</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>LOG_RETENTION</code></td>
+                        <td><code>3 days</code></td>
+                        <td><code>14 days</code></td>
+                        <td><code>30 days</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="security" class="diagram-container">
+            <h2>🛡️ Security Levels</h2>
+            <div class="description">
+                Security progression across environments from development to production.
+            </div>
+            <div class="mermaid">
+graph LR
+    subgraph "Security Progression"
+        DEV_SEC[🔓 Development<br/>Basic Security<br/>Developer Access]
+        PREPROD_SEC[🔒 Pre-Production<br/>Enhanced Security<br/>Team Access]
+        PROD_SEC[🔐 Production<br/>Enterprise Security<br/>Restricted Access]
+    end
+    
+    DEV_SEC --> PREPROD_SEC --> PROD_SEC
+            </div>
+        </div>
+
+        <div id="cost" class="diagram-container">
+            <h2>💰 Cost Breakdown</h2>
+            <div class="description">
+                Monthly cost distribution across environments.
+            </div>
+            <div class="mermaid">
+pie title Monthly Costs by Environment
+    "Development" : 1.4
+    "Pre-Production" : 7.5
+    "Production" : 35
+            </div>
+        </div>
+
+        <div id="resources" class="diagram-container">
+            <h2>📊 Resource Comparison</h2>
+            <div class="description">
+                Comparison of AWS resources and their configurations across environments.
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Resource</th>
+                        <th>Development</th>
+                        <th>Pre-Production</th>
+                        <th>Production</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Lambda</strong></td>
+                        <td>Free Tier</td>
+                        <td>Optimized</td>
+                        <td>High Performance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API Gateway</strong></td>
+                        <td>Free Tier</td>
+                        <td>Enhanced</td>
+                        <td>Caching Enabled</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DynamoDB</strong></td>
+                        <td>25GB Free</td>
+                        <td>Provisioned</td>
+                        <td>Provisioned</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CloudWatch</strong></td>
+                        <td>Basic</td>
+                        <td>Enhanced</td>
+                        <td>Full Monitoring</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CloudFront</strong></td>
+                        <td>❌</td>
+                        <td>❌</td>
+                        <td>✅ CDN</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WAF</strong></td>
+                        <td>❌</td>
+                        <td>❌</td>
+                        <td>✅ Protection</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="flow" class="diagram-container">
+            <h2>🔄 Deployment Flow</h2>
+            <div class="description">
+                Visual representation of the deployment flow from development to production.
+            </div>
+            <div class="mermaid">
+flowchart LR
+    A[Code Changes] --> B[Development Testing]
+    B --> C[Pre-Production Deployment]
+    C --> D[Integration Testing]
+    D --> E[Production Deployment]
+    E --> F[Live Monitoring]
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#fff3e0
+    style D fill:#e8f5e8
+    style E fill:#ffebee
+    style F fill:#f1f8e9
+            </div>
+        </div>
+
+        <div id="contacts" class="diagram-container">
+            <h2>🚨 Emergency Contacts</h2>
+            <div class="description">
+                Contact information for each environment in case of emergencies.
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Environment</th>
+                        <th>Primary Contact</th>
+                        <th>Escalation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Development</strong></td>
+                        <td>Lead Developer</td>
+                        <td>DevOps Engineer</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pre-Production</strong></td>
+                        <td>DevOps Engineer</td>
+                        <td>Production Manager</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Production</strong></td>
+                        <td>On-Call Engineer</td>
+                        <td>CTO/Management</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="commands" class="diagram-container">
+            <h2>📋 Quick Commands</h2>
+            <div class="description">
+                Essential commands for daily operations across all environments.
+            </div>
+            
+            <div class="environment-card">
+                <h3>🖥️ Development</h3>
+                <div class="code-block">
+# Start development server
+cd apps/web/safemate && npm run dev
+
+# Deploy development environment
+.\deploy-dev.ps1
+
+# Check development logs
+aws logs tail /aws/lambda/dev-safemate-* --follow
+                </div>
+            </div>
+
+            <div class="environment-card">
+                <h3>🧪 Pre-Production</h3>
+                <div class="code-block">
+# Deploy pre-production
+.\deploy-preprod.ps1
+
+# Run integration tests
+.\test-integration.ps1
+
+# Monitor pre-production
+aws logs tail /aws/lambda/preprod-safemate-* --follow
+                </div>
+            </div>
+
+            <div class="environment-card">
+                <h3>🌐 Production</h3>
+                <div class="code-block">
+# Deploy production (requires approval)
+.\deploy-prod.ps1
+
+# Monitor production
+aws logs tail /aws/lambda/prod-safemate-* --follow
+
+# Check production health
+.\test-health-production.ps1
+                </div>
+            </div>
+        </div>
+
+        <div id="urls" class="diagram-container">
+            <h2>🎯 Key URLs</h2>
+            <div class="description">
+                Important URLs for accessing each environment and related resources.
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Environment</th>
+                        <th>Frontend</th>
+                        <th>API Gateway</th>
+                        <th>Documentation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Development</strong></td>
+                        <td><a href="http://localhost:5173" target="_blank">http://localhost:5173</a></td>
+                        <td><a href="https://dev-api.safemate.com" target="_blank">https://dev-api.safemate.com</a></td>
+                        <td><a href="../development/README.md">Dev Guide</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pre-Production</strong></td>
+                        <td><a href="https://d19a5c2wn4mtdt.cloudfront.net" target="_blank">https://d19a5c2wn4mtdt.cloudfront.net</a></td>
+                        <td><a href="https://preprod-api.safemate.com" target="_blank">https://preprod-api.safemate.com</a></td>
+                        <td><a href="../preprod/README.md">PreProd Guide</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Production</strong></td>
+                        <td><a href="https://d19a5c2wn4mtdt.cloudfront.net" target="_blank">https://d19a5c2wn4mtdt.cloudfront.net</a></td>
+                        <td><a href="https://prod-api.safemate.com" target="_blank">https://prod-api.safemate.com</a></td>
+                        <td><a href="../production/README.md">Prod Guide</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p><strong>SafeMate Environment Quick Reference</strong></p>
+            <p>This quick reference provides essential information for daily operations across all SafeMate environments.</p>
+            <p>Last Updated: 2025-08-26</p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            },
+            themeVariables: {
+                primaryColor: '#3498db',
+                primaryTextColor: '#2c3e50',
+                primaryBorderColor: '#2980b9',
+                lineColor: '#34495e',
+                secondaryColor: '#ecf0f1',
+                tertiaryColor: '#bdc3c7'
+            }
+        });
+    </script>
+</body>
+</html>

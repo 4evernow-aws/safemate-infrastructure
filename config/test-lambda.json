@@ -1,0 +1,14 @@
+{
+  "httpMethod": "GET",
+  "path": "/folders",
+  "headers": {
+    "Authorization": "Bearer test-token"
+  },
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "test-user"
+      }
+    }
+  }
+}

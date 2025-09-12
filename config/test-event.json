@@ -1,0 +1,1 @@
+﻿{"path":"/folders","requestContext":{"authorizer":{"claims":"System.Collections.Hashtable"}},"headers":{"ContentType":"application/json","Authorization":"Bearer test-token"},"httpMethod":"GET"}

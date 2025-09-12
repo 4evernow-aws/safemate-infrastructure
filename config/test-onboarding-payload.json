@@ -1,0 +1,10 @@
+{
+  "httpMethod": "POST",
+  "path": "/onboarding/start",
+  "queryStringParameters": null,
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer test-token"
+  },
+  "body": "{\"action\": \"start\"}"
+}

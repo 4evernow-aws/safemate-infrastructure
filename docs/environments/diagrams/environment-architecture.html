@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeMate Environment Architecture Diagrams</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-left: 4px solid #3498db;
+        }
+        .diagram-container {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .description {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+        }
+        .nav {
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        .nav a:hover {
+            background-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 SafeMate Environment Architecture Diagrams</h1>
+        
+        <div class="nav">
+            <a href="#overview">Environment Overview</a>
+            <a href="#deployment">Deployment Flow</a>
+            <a href="#configuration">Configuration Management</a>
+            <a href="#aws">AWS Resources</a>
+            <a href="#lifecycle">Environment Lifecycle</a>
+            <a href="#security">Security Architecture</a>
+            <a href="#cost">Cost Management</a>
+            <a href="#troubleshooting">Troubleshooting</a>
+            <a href="#checklist">Deployment Checklist</a>
+        </div>
+
+        <div id="overview" class="diagram-container">
+            <h2>🌍 Environment Overview Diagram</h2>
+            <div class="description">
+                This diagram shows the complete SafeMate multi-environment architecture, including development, pre-production, and production environments with their respective AWS resources and infrastructure components.
+            </div>
+            <div class="mermaid">
+graph TB
+    subgraph "SafeMate Multi-Environment Architecture"
+        subgraph "Development Environment"
+            DEV[Development<br/>Local Development<br/>Free Tier $0.00/month]
+            DEV_FRONTEND[Frontend<br/>http://localhost:5173]
+            DEV_AWS[AWS Resources<br/>Lambda, API Gateway<br/>DynamoDB, Cognito]
+            DEV_HEDERA[Hedera Testnet<br/>Blockchain Integration]
+        end
+        
+        subgraph "Pre-Production Environment"
+            PREPROD[Pre-Production<br/>Staging & Testing<br/>Low Cost ~$5-10/month]
+            PREPROD_FRONTEND[Frontend<br/>https://d19a5c2wn4mtdt.cloudfront.net]
+            PREPROD_AWS[AWS Resources<br/>Production-like Setup<br/>Enhanced Monitoring]
+            PREPROD_HEDERA[Hedera Testnet<br/>Production-like]
+        end
+        
+        subgraph "Production Environment"
+            PROD[Production<br/>Live Application<br/>Standard Cost ~$20-50/month]
+            PROD_FRONTEND[Frontend<br/>https://prod.safemate.com<br/>(TBD - Documented Only)]
+            PROD_AWS[AWS Resources<br/>Enterprise Setup<br/>Full Monitoring]
+            PROD_HEDERA[Hedera Mainnet<br/>Live Blockchain]
+        end
+        
+        subgraph "Infrastructure"
+            TERRAFORM[Terraform<br/>Infrastructure as Code]
+            GITHUB[GitHub Actions<br/>CI/CD Pipeline]
+            AWS[AWS Cloud<br/>us-east-1 Region]
+        end
+    end
+    
+    DEV --> TERRAFORM
+    PREPROD --> TERRAFORM
+    PROD --> TERRAFORM
+    TERRAFORM --> AWS
+    GITHUB --> AWS
+            </div>
+        </div>
+
+        <div id="deployment" class="diagram-container">
+            <h2>🚀 Deployment Flow Diagram</h2>
+            <div class="description">
+                This diagram illustrates the complete deployment workflow from development to production, including the CI/CD pipeline and monitoring processes.
+            </div>
+            <div class="mermaid">
+flowchart TD
+    subgraph "Development Workflow"
+        A[Developer Makes Changes] --> B[Local Testing]
+        B --> C[Commit to Git]
+        C --> D[Push to dev branch]
+        D --> E[Manual Deployment<br/>deploy-dev.ps1]
+        E --> F[Development Environment<br/>Deployed]
+    end
+    
+    subgraph "Pre-Production Workflow"
+        F --> G[Integration Testing]
+        G --> H[Push to preprod branch]
+        H --> I[GitHub Actions<br/>Automated Deployment]
+        I --> J[Pre-Production Environment<br/>Deployed]
+    end
+    
+    subgraph "Production Workflow"
+        J --> K[UAT & Performance Testing]
+        K --> L[Change Request Approval]
+        L --> M[Push to prod branch]
+        M --> N[GitHub Actions<br/>Protected Deployment]
+        N --> O[Production Environment<br/>Deployed]
+    end
+    
+    subgraph "Monitoring & Validation"
+        F --> P[Development Monitoring]
+        J --> Q[Pre-Production Monitoring]
+        O --> R[Production Monitoring]
+        P --> S[CloudWatch Logs]
+        Q --> S
+        R --> S
+    end
+            </div>
+        </div>
+
+        <div id="configuration" class="diagram-container">
+            <h2>⚙️ Configuration Management Diagram</h2>
+            <div class="description">
+                This diagram shows the hierarchical configuration management structure, from global settings to environment-specific configurations.
+            </div>
+            <div class="mermaid">
+graph LR
+    subgraph "Configuration Hierarchy"
+        subgraph "Global Configuration"
+            GLOBAL[terraform/variables.tf<br/>Global Settings]
+        end
+        
+        subgraph "Environment Configuration"
+            ENV_CONFIG[terraform/environments.tf<br/>Environment Detection]
+        end
+        
+        subgraph "Environment Variables"
+            DEV_VARS[terraform/dev.tfvars<br/>Development Settings]
+            PREPROD_VARS[terraform/preprod.tfvars<br/>Pre-Production Settings]
+            PROD_VARS[terraform/prod.tfvars<br/>Production Settings]
+        end
+        
+        subgraph "Application Configuration"
+            DEV_APP[apps/web/safemate/.env.development<br/>Frontend Dev Config]
+            PREPROD_APP[apps/web/safemate/.env.staging<br/>Frontend Staging Config]
+            PROD_APP[apps/web/safemate/.env.production<br/>Frontend Prod Config]
+        end
+    end
+    
+    GLOBAL --> ENV_CONFIG
+    ENV_CONFIG --> DEV_VARS
+    ENV_CONFIG --> PREPROD_VARS
+    ENV_CONFIG --> PROD_VARS
+    
+    DEV_VARS --> DEV_APP
+    PREPROD_VARS --> PREPROD_APP
+    PROD_VARS --> PROD_APP
+            </div>
+        </div>
+
+        <div id="aws" class="diagram-container">
+            <h2>🏗️ AWS Resource Architecture</h2>
+            <div class="description">
+                This diagram shows the AWS resource architecture for all three environments, including Lambda functions, API Gateway, DynamoDB, and other AWS services.
+            </div>
+            <div class="mermaid">
+graph TB
+    subgraph "AWS Cloud (us-east-1)"
+        subgraph "Development Environment"
+            DEV_LAMBDA[Lambda Functions<br/>dev-safemate-*]
+            DEV_API[API Gateway<br/>dev-api.safemate.com]
+            DEV_DB[DynamoDB<br/>dev-safemate-wallets]
+            DEV_COGNITO[Cognito<br/>dev-user-pool]
+            DEV_S3[S3 Bucket<br/>dev-safemate-assets]
+            DEV_KMS[KMS Keys<br/>Encryption]
+            DEV_SECRETS[Secrets Manager<br/>Configuration]
+        end
+        
+        subgraph "Pre-Production Environment"
+            PREPROD_LAMBDA[Lambda Functions<br/>preprod-safemate-*]
+            PREPROD_API[API Gateway<br/>preprod-api.safemate.com]
+            PREPROD_DB[DynamoDB<br/>preprod-safemate-wallets]
+            PREPROD_COGNITO[Cognito<br/>preprod-user-pool]
+            PREPROD_S3[S3 Bucket<br/>preprod-safemate-assets]
+            PREPROD_KMS[KMS Keys<br/>Encryption]
+            PREPROD_SECRETS[Secrets Manager<br/>Configuration]
+        end
+        
+        subgraph "Production Environment"
+            PROD_LAMBDA[Lambda Functions<br/>prod-safemate-*]
+            PROD_API[API Gateway<br/>prod-api.safemate.com]
+            PROD_DB[DynamoDB<br/>prod-safemate-wallets]
+            PROD_COGNITO[Cognito<br/>prod-user-pool]
+            PROD_S3[S3 Bucket<br/>prod-safemate-assets]
+            PROD_KMS[KMS Keys<br/>Encryption]
+            PROD_SECRETS[Secrets Manager<br/>Configuration]
+            PROD_CLOUDFRONT[CloudFront<br/>CDN]
+        end
+        
+        subgraph "Shared Services"
+            CLOUDWATCH[CloudWatch<br/>Monitoring & Logging]
+            IAM[IAM<br/>Access Control]
+            VPC[VPC<br/>Network Security]
+        end
+    end
+    
+    DEV_LAMBDA --> DEV_API
+    DEV_API --> DEV_DB
+    DEV_API --> DEV_COGNITO
+    DEV_LAMBDA --> DEV_S3
+    DEV_LAMBDA --> DEV_KMS
+    DEV_LAMBDA --> DEV_SECRETS
+    
+    PREPROD_LAMBDA --> PREPROD_API
+    PREPROD_API --> PREPROD_DB
+    PREPROD_API --> PREPROD_COGNITO
+    PREPROD_LAMBDA --> PREPROD_S3
+    PREPROD_LAMBDA --> PREPROD_KMS
+    PREPROD_LAMBDA --> PREPROD_SECRETS
+    
+    PROD_LAMBDA --> PROD_API
+    PROD_API --> PROD_DB
+    PROD_API --> PROD_COGNITO
+    PROD_LAMBDA --> PROD_S3
+    PROD_LAMBDA --> PROD_KMS
+    PROD_LAMBDA --> PROD_SECRETS
+    PROD_CLOUDFRONT --> PROD_S3
+    
+    DEV_LAMBDA --> CLOUDWATCH
+    PREPROD_LAMBDA --> CLOUDWATCH
+    PROD_LAMBDA --> CLOUDWATCH
+            </div>
+        </div>
+
+        <div id="lifecycle" class="diagram-container">
+            <h2>🔄 Environment Lifecycle Diagram</h2>
+            <div class="description">
+                This state diagram shows the lifecycle of features and applications through the different environments.
+            </div>
+            <div class="mermaid">
+stateDiagram-v2
+    [*] --> Development
+    
+    state Development {
+        [*] --> LocalDev
+        LocalDev --> AWSTesting
+        AWSTesting --> FeatureComplete
+        FeatureComplete --> ReadyForPreProd
+    }
+    
+    state PreProduction {
+        [*] --> IntegrationTesting
+        IntegrationTesting --> PerformanceTesting
+        PerformanceTesting --> SecurityTesting
+        SecurityTesting --> UAT
+        UAT --> ReadyForProduction
+    }
+    
+    state Production {
+        [*] --> LiveDeployment
+        LiveDeployment --> Monitoring
+        Monitoring --> Maintenance
+        Maintenance --> Updates
+        Updates --> Monitoring
+    }
+    
+    Development --> PreProduction : Feature Complete
+    PreProduction --> Production : All Tests Pass
+    Production --> Development : New Features
+            </div>
+        </div>
+
+        <div id="security" class="diagram-container">
+            <h2>🛡️ Security Architecture Diagram</h2>
+            <div class="description">
+                This diagram illustrates the multi-layered security architecture across all environments.
+            </div>
+            <div class="mermaid">
+graph TB
+    subgraph "Security Layers"
+        subgraph "Network Security"
+            VPC[VPC with Security Groups]
+            WAF[Web Application Firewall]
+            DDoS[DDoS Protection]
+        end
+        
+        subgraph "Access Control"
+            IAM[IAM Roles & Policies]
+            MFA[Multi-Factor Authentication]
+            RBAC[Role-Based Access Control]
+        end
+        
+        subgraph "Data Protection"
+            KMS[KMS Encryption]
+            SECRETS[Secrets Manager]
+            BACKUP[Encrypted Backups]
+        end
+        
+        subgraph "Monitoring & Compliance"
+            CLOUDTRAIL[CloudTrail Logging]
+            GUARDDUTY[GuardDuty Threat Detection]
+            CONFIG[AWS Config Compliance]
+        end
+    end
+    
+    subgraph "Environment Security Levels"
+        subgraph "Development"
+            DEV_SEC[Basic Security<br/>Developer Access]
+        end
+        
+        subgraph "Pre-Production"
+            PREPROD_SEC[Enhanced Security<br/>Team Access]
+        end
+        
+        subgraph "Production"
+            PROD_SEC[Enterprise Security<br/>Restricted Access]
+        end
+    end
+    
+    VPC --> DEV_SEC
+    VPC --> PREPROD_SEC
+    VPC --> PROD_SEC
+    
+    IAM --> DEV_SEC
+    IAM --> PREPROD_SEC
+    IAM --> PROD_SEC
+    
+    KMS --> DEV_SEC
+    KMS --> PREPROD_SEC
+    KMS --> PROD_SEC
+    
+    CLOUDTRAIL --> DEV_SEC
+    CLOUDTRAIL --> PREPROD_SEC
+    CLOUDTRAIL --> PROD_SEC
+            </div>
+        </div>
+
+        <div id="cost" class="diagram-container">
+            <h2>📊 Cost Management Diagram</h2>
+            <div class="description">
+                This diagram shows the cost breakdown by environment and cost optimization strategies.
+            </div>
+            <div class="mermaid">
+graph LR
+    subgraph "Cost Breakdown by Environment"
+        subgraph "Development ($0.00/month)"
+            DEV_COST[Free Tier Resources<br/>Lambda: 1M requests<br/>API Gateway: 1M requests<br/>DynamoDB: 25GB<br/>CloudWatch: Basic]
+            DEV_PAID[Paid Resources<br/>KMS: ~$1/month<br/>Secrets Manager: ~$0.40/month]
+        end
+        
+        subgraph "Pre-Production (~$5-10/month)"
+            PREPROD_COST[Enhanced Resources<br/>Lambda: Optimized<br/>API Gateway: Enhanced<br/>DynamoDB: Provisioned<br/>CloudWatch: Enhanced]
+            PREPROD_MONITORING[Monitoring<br/>Enhanced Logging<br/>Performance Metrics]
+        end
+        
+        subgraph "Production (~$20-50/month)"
+            PROD_COST[Full Resources<br/>Lambda: High Performance<br/>API Gateway: Caching<br/>DynamoDB: Provisioned<br/>CloudWatch: Full]
+            PROD_CDN[CloudFront CDN<br/>Global Distribution]
+            PROD_SECURITY[Security Services<br/>WAF, Shield, GuardDuty]
+        end
+    end
+    
+    subgraph "Cost Optimization"
+        AUTO_SCALE[Auto-scaling Policies]
+        LOG_RETENTION[Log Retention Policies]
+        RESOURCE_CLEANUP[Resource Cleanup]
+        BUDGET_ALERTS[Budget Alerts]
+    end
+    
+    DEV_COST --> AUTO_SCALE
+    PREPROD_COST --> AUTO_SCALE
+    PROD_COST --> AUTO_SCALE
+    
+    DEV_PAID --> LOG_RETENTION
+    PREPROD_MONITORING --> LOG_RETENTION
+    PROD_COST --> LOG_RETENTION
+            </div>
+        </div>
+
+        <div id="troubleshooting" class="diagram-container">
+            <h2>🔧 Troubleshooting Flow Diagram</h2>
+            <div class="description">
+                This flowchart shows the troubleshooting process for issues across different environments.
+            </div>
+            <div class="mermaid">
+flowchart TD
+    A[Issue Detected] --> B{Environment?}
+    
+    B -->|Development| C[Check Local Logs]
+    B -->|Pre-Production| D[Check CloudWatch Logs]
+    B -->|Production| E[Check All Monitoring]
+    
+    C --> F[Development Troubleshooting]
+    D --> G[Pre-Production Troubleshooting]
+    E --> H[Production Troubleshooting]
+    
+    F --> I{Issue Resolved?}
+    G --> I
+    H --> I
+    
+    I -->|No| J[Escalate to DevOps]
+    I -->|Yes| K[Document Solution]
+    
+    J --> L[Team Review]
+    L --> M[Implement Fix]
+    M --> N[Deploy Fix]
+    N --> O[Validate Fix]
+    O --> K
+    
+    K --> P[Update Documentation]
+    P --> Q[Close Issue]
+            </div>
+        </div>
+
+        <div id="checklist" class="diagram-container">
+            <h2>📋 Deployment Checklist Diagram</h2>
+            <div class="description">
+                This diagram shows the comprehensive deployment checklist from pre-deployment to post-deployment validation.
+            </div>
+            <div class="mermaid">
+graph TD
+    subgraph "Pre-Deployment"
+        A1[Code Review Completed]
+        A2[Unit Tests Passing]
+        A3[Integration Tests Passing]
+        A4[Security Scan Completed]
+        A5[Performance Baseline Established]
+        A6[Rollback Plan Prepared]
+    end
+    
+    subgraph "Deployment"
+        B1[Deployment Executed Successfully]
+        B2[Health Checks Passing]
+        B3[Performance Metrics Within Baseline]
+        B4[Security Validation Completed]
+        B5[Monitoring Alerts Configured]
+        B6[Documentation Updated]
+    end
+    
+    subgraph "Post-Deployment"
+        C1[All Systems Operational]
+        C2[Performance Monitoring Active]
+        C3[Security Monitoring Active]
+        C4[Business Validation Completed]
+        C5[Team Notification Sent]
+        C6[Change Request Closed]
+    end
+    
+    A1 --> A2 --> A3 --> A4 --> A5 --> A6
+    A6 --> B1 --> B2 --> B3 --> B4 --> B5 --> B6
+    B6 --> C1 --> C2 --> C3 --> C4 --> C5 --> C6
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>SafeMate Environment Architecture Diagrams</strong></p>
+            <p>These diagrams provide a comprehensive visual representation of the SafeMate environment architecture, deployment processes, and management workflows.</p>
+            <p>Last Updated: 2025-08-26</p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            },
+            themeVariables: {
+                primaryColor: '#3498db',
+                primaryTextColor: '#2c3e50',
+                primaryBorderColor: '#2980b9',
+                lineColor: '#34495e',
+                secondaryColor: '#ecf0f1',
+                tertiaryColor: '#bdc3c7'
+            }
+        });
+    </script>
+</body>
+</html>
