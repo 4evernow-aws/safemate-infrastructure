@@ -9,13 +9,15 @@ async function deployFullLambda() {
   try {
     // Create the complete Lambda function code with full Hedera integration
     const functionCode = `
-const AWS = require('aws-sdk');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, GetCommand, PutCommand } = require('@aws-sdk/lib-dynamodb');
+const { KMSClient, EncryptCommand, DecryptCommand, GenerateDataKeyCommand } = require('@aws-sdk/client-kms');
 const { Client, PrivateKey, AccountId, AccountCreateTransaction, Hbar } = require('@hashgraph/sdk');
 const crypto = require('crypto');
 
-// Initialize AWS services with built-in SDK
-const dynamodb = new AWS.DynamoDB.DocumentClient();
-const kms = new AWS.KMS();
+// Initialize AWS services with SDK v3
+const dynamodb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: 'ap-southeast-2' }));
+const kms = new KMSClient({ region: 'ap-southeast-2' });
 
 // Environment variables
 const WALLET_KEYS_TABLE = process.env.WALLET_KEYS_TABLE || 'safemate-wallet-keys';
@@ -87,8 +89,9 @@ async function encryptPrivateKey(privateKey, keyId) {
       Plaintext: Buffer.from(privateKey, 'utf8')
     };
     
-    const result = await kms.encrypt(params).promise();
-    return result.CiphertextBlob.toString('base64');
+    const command = new EncryptCommand(params);
+    const result = await kms.send(command);
+    return Buffer.from(result.CiphertextBlob).toString('base64');
   } catch (error) {
     console.error('❌ Failed to encrypt private key:', error);
     throw new Error('Failed to encrypt wallet keys');
@@ -105,8 +108,9 @@ async function decryptPrivateKey(encryptedKey, keyId) {
       CiphertextBlob: Buffer.from(encryptedKey, 'base64')
     };
     
-    const result = await kms.decrypt(params).promise();
-    return result.Plaintext.toString('utf8');
+    const command = new DecryptCommand(params);
+    const result = await kms.send(command);
+    return Buffer.from(result.Plaintext).toString('utf8');
   } catch (error) {
     console.error('❌ Failed to decrypt private key:', error);
     throw new Error('Failed to decrypt wallet keys');
@@ -123,7 +127,8 @@ async function getOperatorCredentials() {
       Key: { user_id: 'hedera_operator' }
     };
 
-    const result = await dynamodb.get(params).promise();
+    const command = new GetCommand(params);
+    const result = await dynamodb.send(command);
 
     if (!result.Item) {
       throw new Error('No operator credentials found');
@@ -187,7 +192,7 @@ async function storeWalletData(userId, email, keypair, accountId, initialBalance
     }
     
     // Store wallet keys
-    await dynamodb.put({
+    await dynamodb.send(new PutCommand({
       TableName: WALLET_KEYS_TABLE,
       Item: {
         user_id: userId,
@@ -198,10 +203,10 @@ async function storeWalletData(userId, email, keypair, accountId, initialBalance
         key_type: 'ED25519',
         encryption_type: 'kms'
       }
-    }).promise();
+    }));
     
     // Store wallet metadata
-    await dynamodb.put({
+    await dynamodb.send(new PutCommand({
       TableName: WALLET_METADATA_TABLE,
       Item: {
         user_id: userId,
@@ -217,7 +222,7 @@ async function storeWalletData(userId, email, keypair, accountId, initialBalance
         initial_balance: initialBalance,
         transaction_id: transactionId
       }
-    }).promise();
+    }));
     
     console.log(\`✅ Wallet data stored for user \${userId}\`);
     return { walletId, accountId };
@@ -237,7 +242,8 @@ async function getOnboardingStatus(userId) {
       Key: { user_id: userId }
     };
 
-    const result = await dynamodb.get(params).promise();
+    const command = new GetCommand(params);
+    const result = await dynamodb.send(command);
     
     if (result.Item) {
       return {

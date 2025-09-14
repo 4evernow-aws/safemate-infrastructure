@@ -1,16 +1,11 @@
-const AWS = require('aws-sdk');
+const { LambdaClient, UpdateFunctionCodeCommand } = require('@aws-sdk/client-lambda');
+const { DynamoDBClient, PutItemCommand } = require('@aws-sdk/client-dynamodb');
 const fs = require('fs');
 const path = require('path');
 
-// Configure AWS
-AWS.config.update({
-  region: 'ap-southeast-2',
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
-
-const lambda = new AWS.Lambda();
-const dynamodb = new AWS.DynamoDB();
+// Initialize AWS clients
+const lambda = new LambdaClient({ region: 'ap-southeast-2' });
+const dynamodb = new DynamoDBClient({ region: 'ap-southeast-2' });
 
 async function deployLambda() {
   try {
@@ -24,12 +19,12 @@ async function deployLambda() {
     
     console.log('🚀 Deploying Lambda function...');
     
-    const params = {
+    const command = new UpdateFunctionCodeCommand({
       FunctionName: 'default-safemate-user-onboarding',
       ZipFile: zipBuffer
-    };
+    });
     
-    const result = await lambda.updateFunctionCode(params).promise();
+    const result = await lambda.send(command);
     console.log('✅ Lambda function updated:', result.FunctionName);
     
   } catch (error) {
@@ -41,7 +36,7 @@ async function addOperatorCredentials() {
   try {
     console.log('🔐 Adding operator credentials to DynamoDB...');
     
-    const params = {
+    const command = new PutItemCommand({
       TableName: 'default-safemate-user-secrets',
       Item: {
         user_id: { S: 'operator' },
@@ -49,9 +44,9 @@ async function addOperatorCredentials() {
         private_key: { S: '302e020100300506032b657004220420a74b2a24706db9034445e6e03a0f3fd7a82a926f6c4a95bc5de9a720d453f9f9' },
         public_key: { S: '302a300506032b6570032100c5712af6c6211bd23fbd24ca2d3440938aa7ed958750f5064be8817072283ae1' }
       }
-    };
+    });
     
-    await dynamodb.putItem(params).promise();
+    await dynamodb.send(command);
     console.log('✅ Operator credentials added to DynamoDB');
     
   } catch (error) {

@@ -1,10 +1,12 @@
-const AWS = require('aws-sdk');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, GetCommand, PutCommand } = require('@aws-sdk/lib-dynamodb');
+const { KMSClient, EncryptCommand } = require('@aws-sdk/client-kms');
 const { Client, PrivateKey, AccountId, AccountCreateTransaction, Hbar } = require('./node_modules/@hashgraph/sdk');
 const crypto = require('crypto');
 
-// Initialize AWS services with built-in SDK
-const dynamodb = new AWS.DynamoDB.DocumentClient();
-const kms = new AWS.KMS();
+// Initialize AWS services with SDK v3
+const dynamodb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: 'ap-southeast-2' }));
+const kms = new KMSClient({ region: 'ap-southeast-2' });
 
 // Hedera configuration
 const HEDERA_NETWORK = process.env.HEDERA_NETWORK || 'testnet';
@@ -39,10 +41,10 @@ async function startOnboarding(userId, email) {
     console.log('Starting onboarding for user:', userId);
 
     // Check if user already has a wallet
-    const existingWallet = await dynamodb.get({
+    const existingWallet = await dynamodb.send(new GetCommand({
       TableName: WALLETS_TABLE,
       Key: { userId: userId }
-    }).promise();
+    }));
 
     if (existingWallet.Item) {
       console.log('User already has a wallet:', existingWallet.Item.walletId);
@@ -80,13 +82,13 @@ async function startOnboarding(userId, email) {
     const walletId = crypto.randomUUID();
 
     // Encrypt private key with KMS
-    const encryptParams = {
+    const encryptCommand = new EncryptCommand({
       KeyId: process.env.KMS_KEY_ID,
       Plaintext: privateKey.toString()
-    };
+    });
 
-    const encryptResult = await kms.encrypt(encryptParams).promise();
-    const encryptedPrivateKey = encryptResult.CiphertextBlob.toString('base64');
+    const encryptResult = await kms.send(encryptCommand);
+    const encryptedPrivateKey = Buffer.from(encryptResult.CiphertextBlob).toString('base64');
 
     // Store wallet data in DynamoDB
     const walletData = {
@@ -100,10 +102,10 @@ async function startOnboarding(userId, email) {
       status: 'active'
     };
 
-    await dynamodb.put({
+    await dynamodb.send(new PutCommand({
       TableName: WALLETS_TABLE,
       Item: walletData
-    }).promise();
+    }));
 
     console.log('Wallet data stored in DynamoDB');
 
@@ -129,10 +131,10 @@ async function getWalletStatus(userId) {
   try {
     console.log('Getting wallet status for user:', userId);
 
-    const result = await dynamodb.get({
+    const result = await dynamodb.send(new GetCommand({
       TableName: WALLETS_TABLE,
       Key: { userId: userId }
-    }).promise();
+    }));
 
     if (!result.Item) {
       return {

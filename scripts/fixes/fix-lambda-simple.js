@@ -7,14 +7,16 @@ async function fixLambda() {
   console.log('🔧 Fixing Lambda function to use built-in AWS SDK...');
   
   try {
-    // Create a simple Lambda function that uses built-in AWS SDK
+    // Create a simple Lambda function that uses AWS SDK v3
     const functionCode = `
-const AWS = require('aws-sdk');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, GetCommand, PutCommand } = require('@aws-sdk/lib-dynamodb');
+const { KMSClient, EncryptCommand, DecryptCommand } = require('@aws-sdk/client-kms');
 const crypto = require('crypto');
 
-// Initialize AWS services with built-in SDK
-const dynamodb = new AWS.DynamoDB.DocumentClient();
-const kms = new AWS.KMS();
+// Initialize AWS services with SDK v3
+const dynamodb = DynamoDBDocumentClient.from(new DynamoDBClient({ region: 'ap-southeast-2' }));
+const kms = new KMSClient({ region: 'ap-southeast-2' });
 
 // Environment variables
 const WALLET_KEYS_TABLE = process.env.WALLET_KEYS_TABLE || 'safemate-wallet-keys';
@@ -52,7 +54,8 @@ async function getOnboardingStatus(userId) {
       Key: { user_id: userId }
     };
 
-    const result = await dynamodb.get(params).promise();
+    const command = new GetCommand(params);
+    const result = await dynamodb.send(command);
     
     if (result.Item) {
       return {
