@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { getCurrentUser } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
+import { UserService } from '../services/userService';
+import { UserProfile } from '../types/user';
 interface User {
   id: string;
   username: string;
@@ -24,6 +26,7 @@ interface User {
 }
 interface UserContextType {
   user: User | null;
+  userProfile: UserProfile | null;
   loading: boolean;
   isLoading: boolean; // Alias for loading
   error: string | null;
@@ -31,10 +34,12 @@ interface UserContextType {
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
+  getDisplayName: () => string;
 }
 const UserContext = createContext<UserContextType | null>(null);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -53,23 +58,28 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       setError(null);
       const currentUser = await getCurrentUser();
-      // Create a mock user based on auth user
-      const mockUser: User = {
-        id: currentUser.userId || 'mock-user-id',
-        username: currentUser.username || 'mock-username',
-        email: currentUser.signInDetails?.loginId || 'mock@example.com',
-        name: currentUser.username || 'Mock User',
+      const userProfile = await UserService.getUserProfile();
+      
+      // Create user object with proper name information
+      const user: User = {
+        id: currentUser.userId || userProfile?.sub || 'mock-user-id',
+        username: currentUser.username || userProfile?.username || 'mock-username',
+        email: currentUser.signInDetails?.loginId || userProfile?.email || 'mock@example.com',
+        name: userProfile?.name || userProfile?.givenName || currentUser.username || 'User',
         account_type: 'personal',
         wallet_created: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         signInDetails: currentUser.signInDetails,
         attributes: {
-          name: currentUser.username || 'Mock User',
+          name: userProfile?.name || userProfile?.givenName || currentUser.username || 'User',
+          given_name: userProfile?.givenName,
+          family_name: userProfile?.familyName,
           'custom:account_type': 'personal'
         }
       };
-      setUser(mockUser);
+      setUser(user);
+      setUserProfile(userProfile);
       setIsAuthenticated(true);
     } catch (err) {
       console.log('🔍 UserContext: No authenticated user found (this is normal on app startup)');
@@ -143,15 +153,24 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       hubListenerCancel();
     };
   }, []); // Empty dependency array - only run once on mount
+  const getDisplayName = (): string => {
+    console.log('🔍 UserContext: getDisplayName called with userProfile:', userProfile);
+    const displayName = UserService.getDisplayName(userProfile);
+    console.log('🔍 UserContext: getDisplayName returning:', displayName);
+    return displayName;
+  };
+
   const contextValue: UserContextType = {
     user,
+    userProfile,
     loading,
     isLoading: loading, // Alias for loading
     error,
     isAuthenticated,
     logout,
     refreshUser,
-    updateUser
+    updateUser,
+    getDisplayName
   };
   return (
     <UserContext.Provider value={contextValue}>

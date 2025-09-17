@@ -3,6 +3,9 @@ export interface UserProfile {
   email: string;
   username: string;
   sub: string;
+  givenName?: string;
+  familyName?: string;
+  name?: string;
   
   // Custom Hedera attributes
   hederaAccountId?: string;

@@ -6,6 +6,7 @@ import { useWidgetRegistry } from './core/WidgetRegistry';
 import { useUser } from '../contexts/UserContext';
 import { WidgetRegistration } from './core/WidgetRegistration';
 import { WidgetDevTools, DevModeIndicator, useWidgetDevTools } from './core/WidgetDevTools';
+import { UserService } from '../services/userService';
 import { WalletOverviewWidget } from '../widgets/wallet/WalletOverviewWidget';
 import { WalletSendWidget } from '../widgets/wallet/WalletSendWidget';
 import { WalletReceiveWidget } from '../widgets/wallet/WalletReceiveWidget';
@@ -23,7 +24,7 @@ import '../widgets/index';
 
 // Dashboard Header Component
 const DashboardHeader: React.FC = () => {
-  const { user } = useUser();
+  const { user, getDisplayName } = useUser();
   const { accountType, activeWidgets } = useDashboard();
   const { getStats } = useWidgetRegistry();
 
@@ -48,7 +49,7 @@ const DashboardHeader: React.FC = () => {
           SafeMate Dashboard
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Welcome back, {user?.attributes?.name || user?.attributes?.given_name || user?.username || user?.email || 'User'}
+          Welcome back, {getDisplayName()}
         </Typography>
       </Box>
       

@@ -18,6 +18,81 @@ export class UserService {
   }
 
   /**
+   * Get formatted display name for user
+   */
+  static getDisplayName(user: UserProfile | null): string {
+    if (!user) {
+      console.log('🔍 UserService: No user provided to getDisplayName');
+      return 'User';
+    }
+    
+    console.log('🔍 UserService: Getting display name for user:', {
+      givenName: user.givenName,
+      familyName: user.familyName,
+      name: user.name,
+      username: user.username,
+      email: user.email
+    });
+    
+    // Try to construct full name from given_name and family_name
+    if (user.givenName && user.familyName) {
+      // Capitalize first letter of each name part
+      const capitalizedGivenName = user.givenName.charAt(0).toUpperCase() + user.givenName.slice(1).toLowerCase();
+      const capitalizedFamilyName = user.familyName.charAt(0).toUpperCase() + user.familyName.slice(1).toLowerCase();
+      const fullName = `${capitalizedGivenName} ${capitalizedFamilyName}`;
+      console.log('🔍 UserService: Using full name (capitalized):', fullName);
+      return fullName;
+    }
+    
+    // Fallback to name if available
+    if (user.name) {
+      console.log('🔍 UserService: Using name field:', user.name);
+      return user.name;
+    }
+    
+    // Fallback to given_name only
+    if (user.givenName) {
+      const capitalizedGivenName = user.givenName.charAt(0).toUpperCase() + user.givenName.slice(1).toLowerCase();
+      console.log('🔍 UserService: Using given name only (capitalized):', capitalizedGivenName);
+      return capitalizedGivenName;
+    }
+    
+    // Extract name from email if it looks like a real email
+    if (user.email && user.email.includes('@')) {
+      const emailName = user.email.split('@')[0];
+      // Convert email name to proper case (e.g., "simon.woods" -> "Simon Woods")
+      const nameParts = emailName.split('.').map(part => 
+        part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+      );
+      const emailDerivedName = nameParts.join(' ');
+      console.log('🔍 UserService: Using email-derived name from email:', emailDerivedName);
+      return emailDerivedName;
+    }
+    
+    // Also try username if it's an email
+    if (user.username && user.username.includes('@')) {
+      const emailName = user.username.split('@')[0];
+      // Convert email name to proper case (e.g., "simon.woods" -> "Simon Woods")
+      const nameParts = emailName.split('.').map(part => 
+        part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+      );
+      const emailDerivedName = nameParts.join(' ');
+      console.log('🔍 UserService: Using email-derived name from username:', emailDerivedName);
+      return emailDerivedName;
+    }
+    
+    // Fallback to username if it's not an email
+    if (user.username) {
+      console.log('🔍 UserService: Using username:', user.username);
+      return user.username;
+    }
+    
+    // Final fallback
+    console.log('🔍 UserService: Using final fallback: User');
+    return 'User';
+  }
+
+  /**
    * Get user profile with custom attributes
    */
   static async getUserProfile(): Promise<UserProfile | null> {
@@ -32,10 +107,16 @@ export class UserService {
 
       const payload = idToken.payload;
       
+      // Debug: Log all available payload fields
+      console.log('🔍 UserService: ID Token payload:', JSON.stringify(payload, null, 2));
+      
       return {
         email: payload.email as string || '',
         username: payload['cognito:username'] as string || payload.email as string || '',
         sub: payload.sub as string || '',
+        givenName: payload.given_name as string || '',
+        familyName: payload.family_name as string || '',
+        name: payload.name as string || '',
         hederaAccountId: payload['custom:hedera_account'] as string,
         assetCount: payload['custom:asset_count'] ? parseInt(payload['custom:asset_count'] as string) : 0,
         subscriptionTier: (payload['custom:subscription_tier'] as 'basic' | 'premium' | 'enterprise') || 'basic',

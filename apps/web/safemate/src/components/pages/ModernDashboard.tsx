@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { useUser } from '../../contexts/UserContext';
 import { useHedera } from '../../contexts/HederaContext';
+import { UserService } from '../../services/userService';
 import ModernStatsCard from '../ModernStatsCard';
 import ModernActionCard from '../ModernActionCard';
 
@@ -20,7 +21,7 @@ import ModernActionCard from '../ModernActionCard';
 import { config } from '../../config/environment';
 
 export function ModernDashboard() {
-  const { user, isAuthenticated, logout } = useUser();
+  const { user, isAuthenticated, logout, getDisplayName } = useUser();
   const { account, isInitialized, isLoading, error, refreshBalance, folders, initializeAfterOnboarding } = useHedera();
 
   const [refreshingBalance, setRefreshingBalance] = useState(false);
@@ -123,7 +124,7 @@ export function ModernDashboard() {
       {/* Header */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="h4" gutterBottom>
-          Welcome back, {user?.attributes?.name || 'User'}! 👋
+          Welcome back, {getDisplayName()}! 👋
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Your secure blockchain storage dashboard
