@@ -5,9 +5,9 @@
 locals {
   cloudfront_domain = "d19a5c2wn4mtdt.cloudfront.net"
   allowed_origins = [
-    "http://localhost:5173",  # Development
     "https://${local.cloudfront_domain}",  # Production
-    "https://d19a5c2wn4mtdt.cloudfront.net"  # Direct reference
+    "https://d19a5c2wn4mtdt.cloudfront.net",  # Direct reference
+    "https://preprod-safemate-static-hosting.s3-website-ap-southeast-2.amazonaws.com"  # Preprod S3
   ]
 }
 
@@ -112,7 +112,7 @@ resource "aws_api_gateway_integration_response" "cors_options" {
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"  = "'https://d19a5c2wn4mtdt.cloudfront.net'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
 }
 

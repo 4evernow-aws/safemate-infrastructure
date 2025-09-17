@@ -508,7 +508,7 @@ exports.handler = async (event, context) => {
         statusCode: 401,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || 'http://localhost:5173',
+          'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || '*',
           'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-id-token,x-cognito-access-token,Accept',
           'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
           'Access-Control-Allow-Credentials': 'true'
@@ -529,7 +529,7 @@ exports.handler = async (event, context) => {
           statusCode: 400,
           headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || 'http://localhost:5173',
+            'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || '*',
             'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-id-token,x-cognito-access-token,Accept',
             'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
             'Access-Control-Allow-Credentials': 'true'
@@ -547,7 +547,7 @@ exports.handler = async (event, context) => {
         statusCode: 201,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || 'http://localhost:5173',
+          'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || '*',
           'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-id-token,x-cognito-access-token,Accept',
           'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
           'Access-Control-Allow-Credentials': 'true'
@@ -563,7 +563,7 @@ exports.handler = async (event, context) => {
           statusCode: 400,
           headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || 'http://localhost:5173',
+            'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || '*',
             'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-id-token,x-cognito-access-token,Accept',
             'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
             'Access-Control-Allow-Credentials': 'true'
@@ -581,7 +581,7 @@ exports.handler = async (event, context) => {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || 'http://localhost:5173',
+          'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || '*',
           'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-id-token,x-cognito-access-token,Accept',
           'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
           'Access-Control-Allow-Credentials': 'true'
@@ -599,7 +599,7 @@ exports.handler = async (event, context) => {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || 'http://localhost:5173',
+          'Access-Control-Allow-Origin': event.headers?.origin || event.headers?.Origin || '*',
           'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-id-token,x-cognito-access-token,Accept',
           'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
           'Access-Control-Allow-Credentials': 'true'

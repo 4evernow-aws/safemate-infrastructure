@@ -1254,15 +1254,12 @@ function getUserFromEvent(event) {
 function createResponse(statusCode, body, event) {
   const origin = event?.headers?.origin || event?.headers?.Origin;
   const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:5174',
-    'https://safemate.com',
-    'https://www.safemate.com'
+    'https://preprod-safemate-static-hosting.s3-website-ap-southeast-2.amazonaws.com',
+    'https://d19a5c2wn4mtdt.cloudfront.net'
   ];
   
-  // For development, allow all localhost origins
-  const allowOrigin = origin && (origin.includes('localhost') || allowedOrigins.includes(origin)) ? origin : '*';
+  // For preprod, allow specific origins
+  const allowOrigin = origin && allowedOrigins.includes(origin) ? origin : '*';
   
   return {
     statusCode,

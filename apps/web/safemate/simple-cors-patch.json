@@ -1,7 +1,0 @@
-[
-    {
-        "op": "replace",
-        "path": "/responseParameters/method.response.header.Access-Control-Allow-Headers",
-        "value": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token,x-cognito-id-token,x-cognito-access-token'"
-    }
-]

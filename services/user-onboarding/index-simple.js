@@ -2,15 +2,16 @@
  * SafeMate v2 - User Onboarding Service (Simplified Test Version)
  * 
  * This is a simplified version to test basic functionality and identify 500 errors.
+ * Updated for preprod environment with correct CORS headers and enhanced debugging.
  * 
- * @version 2.1.0
+ * @version 2.1.2
  * @author SafeMate Development Team
- * @lastUpdated 2025-09-01
- * @environment Development
+ * @lastUpdated 2025-09-17
+ * @environment Preprod
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, GetCommand, QueryCommand, PutCommand } = require('@aws-sdk/lib-dynamodb');
 
 // Initialize AWS services
 const dynamodb = new DynamoDBClient({ region: 'ap-southeast-2' });
@@ -19,7 +20,7 @@ const dynamodbDoc = DynamoDBDocumentClient.from(dynamodb);
 // CORS headers
 const corsHeaders = {
   'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': 'http://localhost:5173',
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-id-token,x-cognito-access-token,Accept',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
   'Access-Control-Allow-Credentials': 'true'
@@ -145,8 +146,15 @@ async function startOnboarding(userId, email) {
     
     console.log('🔍 Storing mock wallet metadata:', JSON.stringify(walletData, null, 2));
     
-    // Note: We'll skip actual DynamoDB storage for now to test basic functionality
-    console.log('✅ Mock wallet created successfully for user:', userId);
+    // Store wallet metadata in DynamoDB
+    const putCommand = new PutCommand({
+      TableName: WALLET_METADATA_TABLE,
+      Item: walletData
+    });
+    
+    console.log('🔍 Storing wallet in DynamoDB table:', WALLET_METADATA_TABLE);
+    await dynamodbDoc.send(putCommand);
+    console.log('✅ Mock wallet stored successfully in DynamoDB for user:', userId);
     
     return {
       statusCode: 200,
@@ -204,6 +212,10 @@ exports.handler = async (event) => {
       };
     }
     
+    // Debug request context
+    console.log('🔧 Request context:', JSON.stringify(event.requestContext, null, 2));
+    console.log('🔧 Authorizer:', JSON.stringify(event.requestContext?.authorizer, null, 2));
+    
     // Extract user information from Cognito claims
     const userClaims = event.requestContext?.authorizer?.claims || {};
     const userId = userClaims.sub || userClaims['cognito:username'] || 'default-user';
@@ -212,6 +224,24 @@ exports.handler = async (event) => {
     console.log('🔧 User claims:', userClaims);
     console.log('🔧 Extracted userId:', userId);
     console.log('🔧 Extracted email:', email);
+    
+    // If no claims are available, return a more informative error
+    if (!userClaims || Object.keys(userClaims).length === 0) {
+      console.log('❌ No user claims found in request context');
+      return {
+        statusCode: 401,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          success: false,
+          error: 'No user claims found in request context',
+          debug: {
+            hasRequestContext: !!event.requestContext,
+            hasAuthorizer: !!event.requestContext?.authorizer,
+            hasClaims: !!event.requestContext?.authorizer?.claims
+          }
+        })
+      };
+    }
     
     const path = event.path;
     const httpMethod = event.httpMethod;

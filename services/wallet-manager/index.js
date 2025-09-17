@@ -277,10 +277,8 @@ class WalletManager {
 exports.handler = async (event) => {
     const origin = event.headers?.origin || event.headers?.Origin;
     const allowedOrigins = [
-        'http://localhost:5173',
-        'http://localhost:3000',
-        'https://safemate.com',
-        'https://www.safemate.com'
+        'https://preprod-safemate-static-hosting.s3-website-ap-southeast-2.amazonaws.com',
+        'https://d19a5c2wn4mtdt.cloudfront.net'
     ];
     
     const allowOrigin = origin && allowedOrigins.includes(origin) ? origin : 'null';

@@ -35,26 +35,28 @@
  * - Cognito JWT token validation
  * - CORS protection for cross-origin requests
  * 
- * @version 2.2.0
+ * @version 2.2.1
  * @author SafeMate Development Team
- * @lastUpdated 2025-01-01
- * @environment Development (dev)
+ * @lastUpdated 2025-09-17
+ * @environment Preprod (preprod)
  * @awsRegion ap-southeast-2
  * @hederaNetwork testnet
- * @corsOrigin http://localhost:5173
+ * @corsOrigin *
  * @supportedMethods GET,POST,PUT,DELETE,OPTIONS
+ * @note TEMPORARY: Using mock Hedera integration for testing 502 errors
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { KMSClient, EncryptCommand, DecryptCommand } = require('@aws-sdk/client-kms');
-const { 
-  Client, 
-  AccountCreateTransaction, 
-  PrivateKey, 
-  Hbar,
-  AccountId
-} = require('@hashgraph/sdk');
+// Temporarily comment out Hedera SDK to test basic functionality
+// const { 
+//   Client, 
+//   AccountCreateTransaction, 
+//   PrivateKey, 
+//   Hbar,
+//   AccountId
+// } = require('@hashgraph/sdk');
 
 // Initialize AWS services
 const dynamodb = new DynamoDBClient({ region: 'ap-southeast-2' });
@@ -172,109 +174,20 @@ function extractUserInfo(event) {
   return { userId, email, userClaims };
 }
 
-/**
- * Get operator credentials from DynamoDB
- */
+// Temporarily comment out Hedera-related functions for testing
+/*
 async function getOperatorCredentials() {
-  try {
-    console.log('🔍 Getting operator credentials from DynamoDB...');
-    
-    const result = await dynamodbDoc.send(new GetCommand({
-      TableName: WALLET_KEYS_TABLE,
-      Key: { user_id: 'hedera_operator' }
-    }));
-
-    if (!result.Item) {
-      throw new Error('No operator credentials found in DynamoDB');
-    }
-
-    console.log('✅ Operator credentials found');
-    return result.Item;
-    
-  } catch (error) {
-    console.error('❌ Failed to get operator credentials:', error);
-    throw error;
-  }
+  // ... function body commented out for testing
 }
 
-/**
- * Decrypt private key using KMS
- */
 async function decryptPrivateKey(encryptedKey, keyId) {
-  try {
-    console.log('🔐 Decrypting private key with KMS...');
-    
-    const decryptCommand = new DecryptCommand({
-      KeyId: keyId,
-      CiphertextBlob: Buffer.from(encryptedKey, 'base64')
-    });
-    
-    const decryptResult = await kms.send(decryptCommand);
-    
-    console.log('✅ Private key decrypted successfully');
-    console.log('🔍 Decrypted key type:', typeof decryptResult.Plaintext);
-    console.log('🔍 Decrypted key length:', decryptResult.Plaintext.length);
-    console.log('🔍 Decrypted key preview:', decryptResult.Plaintext.slice(0, 10));
-    
-    // The decrypted result is already the raw 32-byte private key
-    console.log('🔍 Decrypted raw bytes, returning directly');
-    
-    return decryptResult.Plaintext;
-    
-  } catch (error) {
-    console.error('❌ Failed to decrypt private key:', error);
-    throw error;
-  }
+  // ... function body commented out for testing
 }
 
-/**
- * Initialize Hedera client with operator account
- */
 async function initializeHederaClient() {
-  try {
-    console.log('🔧 Initializing Hedera client...');
-    
-    // Get operator credentials from DynamoDB
-    const operatorCredentials = await getOperatorCredentials();
-    
-    // Decrypt private key
-    const privateKeyBytes = await decryptPrivateKey(
-      operatorCredentials.encrypted_private_key,
-      OPERATOR_PRIVATE_KEY_KMS_KEY_ID
-    );
-    
-    console.log('🔍 Decrypted private key format:', typeof privateKeyBytes);
-    console.log('🔍 Decrypted private key length:', privateKeyBytes.length);
-    console.log('🔍 Decrypted private key preview:', Array.from(privateKeyBytes.slice(0, 8)));
-    
-    // Create Hedera client - use the raw bytes directly
-    let operatorPrivateKey;
-    try {
-      if (privateKeyBytes.length !== 32) {
-        throw new Error(`Invalid key length: expected 32 bytes, got ${privateKeyBytes.length}`);
-      }
-      
-      operatorPrivateKey = PrivateKey.fromBytes(privateKeyBytes);
-      console.log('✅ Private key loaded as raw 32-byte key');
-    } catch (keyError) {
-      console.log('❌ Raw key failed:', keyError.message);
-      throw new Error(`Failed to load private key: ${keyError.message}`);
-    }
-    const operatorAccountId = AccountId.fromString(operatorCredentials.account_id);
-    
-    const client = Client.forName(HEDERA_NETWORK);
-    client.setOperator(operatorAccountId, operatorPrivateKey);
-    
-    console.log('✅ Hedera client initialized successfully');
-    console.log('🔧 Operator account:', operatorCredentials.account_id);
-    
-    return { client, operatorAccountId, operatorPrivateKey };
-    
-  } catch (error) {
-    console.error('❌ Error initializing Hedera client:', error);
-    throw error;
-  }
+  // ... function body commented out for testing
 }
+*/
 
 /**
  * Get onboarding status for a user
@@ -369,33 +282,20 @@ async function startOnboarding(userId, email) {
       };
     }
     
-    console.log('🔧 Creating real Hedera wallet for user:', userId);
+    console.log('🔧 Creating mock Hedera wallet for user:', userId);
     
-    // Initialize Hedera client
-    const { client } = await initializeHederaClient();
+    // Generate mock account ID and keypair for testing
+    const mockAccountId = '0.0.' + Math.floor(Math.random() * 1000000);
+    const mockPublicKey = '302a300506032b6570032100' + Math.random().toString(16).substring(2, 66);
+    const mockPrivateKey = '302e020100300506032b657004220420' + Math.random().toString(16).substring(2, 66);
     
-    // Generate new Ed25519 keypair for user
-    const userPrivateKey = PrivateKey.generateED25519();
-    const userPublicKey = userPrivateKey.publicKey;
-    
-    console.log('🔑 Generated Ed25519 keypair for user');
-    
-    // Create Hedera account with initial funding
-    const transaction = new AccountCreateTransaction()
-      .setKey(userPublicKey)
-      .setInitialBalance(new Hbar(0.1))
-      .setMaxAutomaticTokenAssociations(10);
-    
-    const response = await transaction.execute(client);
-    const receipt = await response.getReceipt(client);
-    const accountId = receipt.accountId;
-    
-    console.log('✅ Created Hedera account:', accountId.toString());
+    console.log('🔑 Generated mock Ed25519 keypair for user');
+    console.log('✅ Created mock Hedera account:', mockAccountId);
     
     // Encrypt private key with KMS
     const encryptCommand = new EncryptCommand({
       KeyId: WALLET_KMS_KEY_ID,
-      Plaintext: userPrivateKey.toString()
+      Plaintext: mockPrivateKey
     });
     
     const encryptResult = await kms.send(encryptCommand);
@@ -408,8 +308,8 @@ async function startOnboarding(userId, email) {
     const walletData = {
       user_id: userId,
       wallet_id: walletId,
-      hedera_account_id: accountId.toString(),
-      public_key: userPublicKey.toString(),
+      hedera_account_id: mockAccountId,
+      public_key: mockPublicKey,
       account_type: 'personal',
       network: 'testnet',
       initial_balance_hbar: '0.1',
@@ -443,25 +343,25 @@ async function startOnboarding(userId, email) {
       Item: keyData
     }));
     
-    console.log('✅ Real Hedera wallet created successfully for user:', userId);
+    console.log('✅ Mock Hedera wallet created successfully for user:', userId);
     
     return {
       statusCode: 200,
       headers: corsHeaders,
       body: JSON.stringify({
         success: true,
-        message: 'Real Hedera wallet created successfully',
+        message: 'Mock Hedera wallet created successfully',
         hasWallet: true,
         wallet: {
           wallet_id: walletId,
-          hedera_account_id: accountId.toString(),
-          public_key: userPublicKey.toString(),
+          hedera_account_id: mockAccountId,
+          public_key: mockPublicKey,
           account_type: 'personal',
           network: 'testnet',
           initial_balance_hbar: '0.1',
           needs_funding: false,
           created_by_operator: true,
-          transaction_id: response.transactionId.toString()
+          transaction_id: 'mock-transaction-' + Date.now()
         }
       })
     };

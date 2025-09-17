@@ -1,0 +1,12 @@
+{
+  "httpMethod": "GET",
+  "path": "/onboarding/status",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "test-user",
+        "email": "test@example.com"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Variables": {
+    "APP_SECRETS_KMS_KEY_ID": "arn:aws:kms:ap-southeast-2:994220462693:key/3b18b0c0-dd1f-41db-8bac-6ec857c1ed05",
+    "HEDERA_NETWORK": "testnet",
+    "WALLET_KMS_KEY_ID": "arn:aws:kms:ap-southeast-2:994220462693:key/3b18b0c0-dd1f-41db-8bac-6ec857c1ed05",
+    "WALLET_METADATA_TABLE": "preprod-safemate-wallet-metadata",
+    "COGNITO_USER_POOL_ID": "ap-southeast-2_pMo5BXFiM",
+    "WALLET_KEYS_TABLE": "preprod-safemate-wallet-keys",
+    "REGION": "ap-southeast-2",
+    "OPERATOR_PRIVATE_KEY_KMS_KEY_ID": "arn:aws:kms:ap-southeast-2:994220462693:key/3b18b0c0-dd1f-41db-8bac-6ec857c1ed05"
+  }
+}

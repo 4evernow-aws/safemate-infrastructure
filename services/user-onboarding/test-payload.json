@@ -1,11 +1,15 @@
 {
   "httpMethod": "GET",
   "path": "/onboarding/status",
+  "headers": {
+    "Authorization": "Bearer eyJraWQiOiJScmdFZ1wvMGlYRXVyN3FEZzZCUnJjcTNRcnpcL2..."
+  },
   "requestContext": {
     "authorizer": {
       "claims": {
-        "sub": "test-user-123",
-        "email": "test@example.com"
+        "sub": "f90ef478-5021-7050-8511-31e2d0e641c1",
+        "email": "simon.woods@tne.com.au",
+        "cognito:username": "simon.woods@tne.com.au"
       }
     }
   }
