@@ -14,7 +14,7 @@
 - ✅ **DynamoDB Tables**: All tables created and configured
 - ✅ **Cognito User Pool**: Preprod pool active (`ap-southeast-2_pMo5BXFiM`)
 - ✅ **KMS Encryption**: Successfully migrated to new key (`3b18b0c0-dd1f-41db-8bac-6ec857c1ed05`)
-- ✅ **Secrets Manager**: Updated with new KMS key
+- ✅ **KMS + DynamoDB**: Migrated from Secrets Manager to KMS + DynamoDB approach
 
 ### Frontend Deployment (100% Complete)
 - ✅ **Build**: Successfully built for preprod environment

@@ -1,7 +1,7 @@
-# Enhanced IAM policy for KMS and Secrets Manager access
-resource "aws_iam_policy" "safemate_kms_secrets_access" {
-  name        = "SafeMateLambdaKMSSecretsAccess"
-  description = "Allow SafeMate Lambda functions to access KMS and Secrets Manager"
+# Enhanced IAM policy for KMS access
+resource "aws_iam_policy" "safemate_kms_access" {
+  name        = "SafeMateLambdaKMSAccess"
+  description = "Allow SafeMate Lambda functions to access KMS for encryption/decryption"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -37,7 +37,7 @@ resource "aws_iam_policy" "safemate_kms_secrets_access" {
   })
 
   tags = {
-    Name        = "SafeMate KMS Secrets Access Policy"
+    Name        = "SafeMate KMS Access Policy"
     Environment = "development"
     Service     = "safemate"
     Security    = "high"
@@ -45,29 +45,29 @@ resource "aws_iam_policy" "safemate_kms_secrets_access" {
 }
 
 # Attach the policy to existing Lambda roles
-resource "aws_iam_role_policy_attachment" "user_onboarding_kms_secrets" {
+resource "aws_iam_role_policy_attachment" "user_onboarding_kms" {
   role       = aws_iam_role.user_onboarding_lambda_exec.name
-  policy_arn = aws_iam_policy.safemate_kms_secrets_access.arn
+  policy_arn = aws_iam_policy.safemate_kms_access.arn
 }
 
-resource "aws_iam_role_policy_attachment" "wallet_manager_kms_secrets" {
+resource "aws_iam_role_policy_attachment" "wallet_manager_kms" {
   role       = aws_iam_role.wallet_lambda_exec.name
-  policy_arn = aws_iam_policy.safemate_kms_secrets_access.arn
+  policy_arn = aws_iam_policy.safemate_kms_access.arn
 }
 
-resource "aws_iam_role_policy_attachment" "hedera_service_kms_secrets" {
+resource "aws_iam_role_policy_attachment" "hedera_service_kms" {
   role       = aws_iam_role.hedera_lambda_exec.name
-  policy_arn = aws_iam_policy.safemate_kms_secrets_access.arn
+  policy_arn = aws_iam_policy.safemate_kms_access.arn
 }
 
-resource "aws_iam_role_policy_attachment" "group_manager_kms_secrets" {
+resource "aws_iam_role_policy_attachment" "group_manager_kms" {
   role       = aws_iam_role.group_lambda_exec.name
-  policy_arn = aws_iam_policy.safemate_kms_secrets_access.arn
+  policy_arn = aws_iam_policy.safemate_kms_access.arn
 }
 
-resource "aws_iam_role_policy_attachment" "token_vault_kms_secrets" {
+resource "aws_iam_role_policy_attachment" "token_vault_kms" {
   role       = aws_iam_role.vault_lambda_exec.name
-  policy_arn = aws_iam_policy.safemate_kms_secrets_access.arn
+  policy_arn = aws_iam_policy.safemate_kms_access.arn
 }
 
 # Additional security policy for audit logging

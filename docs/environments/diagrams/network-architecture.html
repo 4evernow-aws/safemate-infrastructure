@@ -159,7 +159,7 @@ graph TB
         
         subgraph "Security Services"
             KMS[KMS<br/>Key Management]
-            SECRETS[Secrets Manager<br/>Configuration]
+            KMS_EXTRA[KMS Keys<br/>Additional Encryption]
             COGNITO[Cognito<br/>User Authentication]
         end
     end
@@ -195,13 +195,13 @@ graph TB
     
     %% Security connections
     DEV_LAMBDA --> KMS
-    DEV_LAMBDA --> SECRETS
+    DEV_LAMBDA --> KMS_EXTRA
     DEV_LAMBDA --> COGNITO
     PREPROD_LAMBDA --> KMS
-    PREPROD_LAMBDA --> SECRETS
+    PREPROD_LAMBDA --> KMS_EXTRA
     PREPROD_LAMBDA --> COGNITO
     PROD_LAMBDA --> KMS
-    PROD_LAMBDA --> SECRETS
+    PROD_LAMBDA --> KMS_EXTRA
     PROD_LAMBDA --> COGNITO
     
     %% External connections
@@ -244,7 +244,7 @@ graph TB
         
         subgraph "Data Security"
             KMS_SEC[KMS<br/>Encryption Keys<br/>Key Rotation]
-            SECRETS_SEC[Secrets Manager<br/>Secure Storage<br/>Automatic Rotation]
+            DYNAMODB_SEC[DynamoDB<br/>Encrypted Storage<br/>KMS Integration]
             BACKUP_SEC[Encrypted Backups<br/>Cross-region Replication<br/>Retention Policies]
         end
         
@@ -279,8 +279,8 @@ graph TB
     IAM_SEC --> MFA_SEC
     MFA_SEC --> COGNITO_SEC
     COGNITO_SEC --> KMS_SEC
-    KMS_SEC --> SECRETS_SEC
-    SECRETS_SEC --> BACKUP_SEC
+    KMS_SEC --> DYNAMODB_SEC
+    DYNAMODB_SEC --> BACKUP_SEC
     BACKUP_SEC --> CLOUDTRAIL_SEC
     CLOUDTRAIL_SEC --> GUARDDUTY_SEC
     GUARDDUTY_SEC --> CONFIG_SEC
@@ -328,7 +328,7 @@ flowchart TD
         end
         
         subgraph "Configuration"
-            SECRETS[Secrets Manager<br/>API Keys<br/>Database Credentials<br/>Environment Variables]
+            KMS_CONFIG[KMS + DynamoDB<br/>Encrypted Configuration<br/>API Keys<br/>Environment Variables]
         end
     end
     
@@ -354,7 +354,7 @@ flowchart TD
     API_GW --> NOTIFICATION
     
     AUTH --> DYNAMODB
-    AUTH --> SECRETS
+    AUTH --> KMS_CONFIG
     WALLET --> DYNAMODB
     WALLET --> HEDERA_NETWORK
     TRANSACTION --> DYNAMODB
@@ -398,7 +398,7 @@ graph TB
             NETWORK[Network Module<br/>VPC, Subnets, Security Groups]
             COMPUTE[Compute Module<br/>Lambda Functions, API Gateway]
             STORAGE[Storage Module<br/>DynamoDB, S3, KMS]
-            SECURITY[Security Module<br/>IAM, Cognito, Secrets Manager]
+            SECURITY[Security Module<br/>IAM, Cognito, KMS]
             MONITORING[Monitoring Module<br/>CloudWatch, X-Ray, GuardDuty]
         end
     end

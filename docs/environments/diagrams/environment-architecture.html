@@ -236,7 +236,7 @@ graph TB
             DEV_COGNITO[Cognito<br/>dev-user-pool]
             DEV_S3[S3 Bucket<br/>dev-safemate-assets]
             DEV_KMS[KMS Keys<br/>Encryption]
-            DEV_SECRETS[Secrets Manager<br/>Configuration]
+            DEV_KMS_EXTRA[KMS Keys<br/>Encryption]
         end
         
         subgraph "Pre-Production Environment"
@@ -246,7 +246,7 @@ graph TB
             PREPROD_COGNITO[Cognito<br/>preprod-user-pool]
             PREPROD_S3[S3 Bucket<br/>preprod-safemate-assets]
             PREPROD_KMS[KMS Keys<br/>Encryption]
-            PREPROD_SECRETS[Secrets Manager<br/>Configuration]
+            PREPROD_KMS_EXTRA[KMS Keys<br/>Encryption]
         end
         
         subgraph "Production Environment"
@@ -256,7 +256,7 @@ graph TB
             PROD_COGNITO[Cognito<br/>prod-user-pool]
             PROD_S3[S3 Bucket<br/>prod-safemate-assets]
             PROD_KMS[KMS Keys<br/>Encryption]
-            PROD_SECRETS[Secrets Manager<br/>Configuration]
+            PROD_KMS_EXTRA[KMS Keys<br/>Encryption]
             PROD_CLOUDFRONT[CloudFront<br/>CDN]
         end
         
@@ -272,21 +272,21 @@ graph TB
     DEV_API --> DEV_COGNITO
     DEV_LAMBDA --> DEV_S3
     DEV_LAMBDA --> DEV_KMS
-    DEV_LAMBDA --> DEV_SECRETS
+    DEV_LAMBDA --> DEV_KMS_EXTRA
     
     PREPROD_LAMBDA --> PREPROD_API
     PREPROD_API --> PREPROD_DB
     PREPROD_API --> PREPROD_COGNITO
     PREPROD_LAMBDA --> PREPROD_S3
     PREPROD_LAMBDA --> PREPROD_KMS
-    PREPROD_LAMBDA --> PREPROD_SECRETS
+    PREPROD_LAMBDA --> PREPROD_KMS_EXTRA
     
     PROD_LAMBDA --> PROD_API
     PROD_API --> PROD_DB
     PROD_API --> PROD_COGNITO
     PROD_LAMBDA --> PROD_S3
     PROD_LAMBDA --> PROD_KMS
-    PROD_LAMBDA --> PROD_SECRETS
+    PROD_LAMBDA --> PROD_KMS_EXTRA
     PROD_CLOUDFRONT --> PROD_S3
     
     DEV_LAMBDA --> CLOUDWATCH
@@ -408,7 +408,7 @@ graph LR
     subgraph "Cost Breakdown by Environment"
         subgraph "Development ($0.00/month)"
             DEV_COST[Free Tier Resources<br/>Lambda: 1M requests<br/>API Gateway: 1M requests<br/>DynamoDB: 25GB<br/>CloudWatch: Basic]
-            DEV_PAID[Paid Resources<br/>KMS: ~$1/month<br/>Secrets Manager: ~$0.40/month]
+            DEV_PAID[Paid Resources<br/>KMS: ~$1/month]
         end
         
         subgraph "Pre-Production (~$5-10/month)"

@@ -1,0 +1,23 @@
+{
+  "name": "hedera-nft-service",
+  "version": "1.0.1",
+  "description": "SafeMate Hedera NFT Service for folder creation - Updated for Lambda Layer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "@aws-sdk/client-kms": "^3.0.0"
+  },
+  "keywords": [
+    "hedera",
+    "nft",
+    "blockchain",
+    "safemate",
+    "lambda"
+  ],
+  "author": "SafeMate Development Team",
+  "license": "MIT"
+}

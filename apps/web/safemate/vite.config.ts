@@ -14,6 +14,7 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
+    'process.env': '{}',
   },
   build: {
     target: 'es2015',
@@ -46,7 +47,8 @@ export default defineConfig({
     include: [
       '@mui/material',
       '@mui/icons-material',
-      '@aws-amplify/ui-react'
+      '@aws-amplify/ui-react',
+      '@hashgraph/sdk'
     ],
     exclude: ['aws-amplify']
   },
@@ -54,6 +56,17 @@ export default defineConfig({
     alias: {
       buffer: 'buffer',
       process: 'process/browser',
+      stream: 'stream-browserify',
+      crypto: 'crypto-browserify',
+      util: 'util',
+      assert: 'assert',
+      http: 'stream-http',
+      https: 'https-browserify',
+      os: 'os-browserify/browser',
+      path: 'path-browserify',
+      fs: false,
+      net: false,
+      tls: false,
     },
   },
   publicDir: 'public',

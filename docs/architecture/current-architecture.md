@@ -99,13 +99,9 @@ Amazon Cognito
 AWS KMS (Key Management Service)
 ├── Encryption Keys
 └── Cost: ~$1/month
-
-AWS Secrets Manager
-├── Hedera Private Keys
-└── Cost: ~$0.40/month
 ```
 
-**Total Required Cost**: ~$1.40/month
+**Total Required Cost**: ~$1/month
 
 ## 🚫 Removed Expensive Components
 
@@ -162,7 +158,7 @@ Cognito User Pool → JWT Tokens → API Gateway → Lambda Functions
 
 ### **Data Encryption**
 ```
-KMS Keys → DynamoDB Encryption → S3 Encryption → Secrets Manager
+KMS Keys → DynamoDB Encryption → S3 Encryption
 ```
 
 ### **Network Security**

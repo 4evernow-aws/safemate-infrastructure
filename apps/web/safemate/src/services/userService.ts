@@ -57,7 +57,7 @@ export class UserService {
       return capitalizedGivenName;
     }
     
-    // Extract name from email if it looks like a real email
+    // Extract name from email if it looks like a real email (PRIORITY: Check email first)
     if (user.email && user.email.includes('@')) {
       const emailName = user.email.split('@')[0];
       // Convert email name to proper case (e.g., "simon.woods" -> "Simon Woods")
@@ -81,8 +81,8 @@ export class UserService {
       return emailDerivedName;
     }
     
-    // Fallback to username if it's not an email
-    if (user.username) {
+    // Fallback to username if it's not an email (but only if it's not a UUID)
+    if (user.username && !user.username.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       console.log('🔍 UserService: Using username:', user.username);
       return user.username;
     }

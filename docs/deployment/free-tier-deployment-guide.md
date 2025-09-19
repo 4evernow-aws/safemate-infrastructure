@@ -50,7 +50,6 @@ cd terraform
 | Service | Monthly Cost | Purpose |
 |---------|--------------|---------|
 | **KMS** | ~$1.00 | Encryption keys |
-| **Secrets Manager** | ~$0.40 | Hedera private keys |
 
 ### **❌ Expensive Services (Never Use)**
 | Service | Monthly Cost | Replacement |
@@ -296,7 +295,7 @@ aws ce get-cost-and-usage --granularity DAILY
 ## 🎯 Success Metrics
 
 ### **Cost Metrics**
-- **Monthly Cost**: < $2.00 ✅
+- **Monthly Cost**: < $1.50 ✅
 - **Cost per Request**: < $0.001 ✅
 - **Infrastructure Efficiency**: > 95% ✅
 

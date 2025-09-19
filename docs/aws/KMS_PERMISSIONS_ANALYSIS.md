@@ -13,8 +13,8 @@
 ### **Attached Policies**
 The Lambda function has the following policies attached:
 
-1. **`SafeMateLambdaKMSSecretsAccess`** ✅ **CRITICAL**
-   - **Purpose**: Allows access to KMS keys and Secrets Manager
+1. **`SafeMateLambdaKMSAccess`** ✅ **CRITICAL**
+   - **Purpose**: Allows access to KMS keys for encryption/decryption
    - **Permissions**: 
      - `kms:Decrypt`
      - `kms:GenerateDataKey*`

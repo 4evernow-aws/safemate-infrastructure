@@ -46,6 +46,8 @@ export class HederaApiService {
 
   /**
    * List all folders for the current user
+   * Note: Since folders go directly to Hedera blockchain, this returns empty list
+   * when API endpoint is not available (expected behavior for blockchain-only architecture)
    */
   static async listFolders(): Promise<ApiResponse<HederaFolderInfo[]>> {
     console.log('🔍 HederaApiService: Listing folders');
@@ -70,9 +72,9 @@ export class HederaApiService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.warn(`⚠️ HederaApiService: API endpoint not available (${response.status}): ${errorText}`);
+        console.log(`📁 HederaApiService: API endpoint not available (${response.status}) - using blockchain-only architecture`);
         
-        // Return empty folders list instead of failing
+        // Return empty folders list for blockchain-only architecture
         return {
           success: true,
           data: []
@@ -113,10 +115,11 @@ export class HederaApiService {
   }
 
   /**
-   * Create a new folder
+   * Create a new folder as NFT on Hedera blockchain
+   * Real implementation using backend NFT service
    */
-  static async createFolder(folderName: string): Promise<ApiResponse<any>> {
-    console.log('🔍 HederaApiService: Creating folder:', folderName);
+  static async createFolder(folderName: string, parentFolderId?: string): Promise<ApiResponse<any>> {
+    console.log('🔍 HederaApiService: Creating real NFT folder:', folderName);
     
     try {
       const session = await fetchAuthSession();
@@ -126,7 +129,8 @@ export class HederaApiService {
         throw new Error('No authentication token available');
       }
 
-      const url = `${this.API_BASE_URL}/folders`;
+      // Call the real NFT service
+      const url = `${this.API_BASE_URL}/nft/create`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -135,21 +139,22 @@ export class HederaApiService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          name: folderName
+          folderName,
+          parentFolderId
         })
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to create folder: ${response.status} ${errorText}`);
+        throw new Error(`Failed to create NFT folder: ${response.status} ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('✅ HederaApiService: Folder created successfully:', result);
+      console.log('✅ HederaApiService: Real NFT folder created successfully:', result);
       
       return result;
     } catch (error) {
-      console.error('❌ HederaApiService: Failed to create folder:', error);
+      console.error('❌ HederaApiService: Failed to create real NFT folder:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'

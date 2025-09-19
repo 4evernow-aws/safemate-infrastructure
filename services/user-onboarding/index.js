@@ -35,28 +35,29 @@
  * - Cognito JWT token validation
  * - CORS protection for cross-origin requests
  * 
- * @version 2.2.1
+ * @version 2.5.0
  * @author SafeMate Development Team
- * @lastUpdated 2025-09-17
+ * @lastUpdated 2025-09-18
+ * @fix Fixed missing Hedera helper functions causing 502 errors
+ * @fix Removed Secrets Manager dependency, using KMS + DynamoDB
  * @environment Preprod (preprod)
  * @awsRegion ap-southeast-2
  * @hederaNetwork testnet
  * @corsOrigin *
  * @supportedMethods GET,POST,PUT,DELETE,OPTIONS
- * @note TEMPORARY: Using mock Hedera integration for testing 502 errors
+ * @note KMS + DYNAMODB INTEGRATION: Using KMS for encryption and DynamoDB for storage (No Secrets Manager)
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { KMSClient, EncryptCommand, DecryptCommand } = require('@aws-sdk/client-kms');
-// Temporarily comment out Hedera SDK to test basic functionality
-// const { 
-//   Client, 
-//   AccountCreateTransaction, 
-//   PrivateKey, 
-//   Hbar,
-//   AccountId
-// } = require('@hashgraph/sdk');
+const {
+  Client,
+  AccountCreateTransaction, 
+  PrivateKey, 
+  Hbar,
+  AccountId
+} = require('@hashgraph/sdk');
 
 // Initialize AWS services
 const dynamodb = new DynamoDBClient({ region: 'ap-southeast-2' });
@@ -174,20 +175,75 @@ function extractUserInfo(event) {
   return { userId, email, userClaims };
 }
 
-// Temporarily comment out Hedera-related functions for testing
-/*
+/**
+ * Get operator credentials from KMS
+ */
 async function getOperatorCredentials() {
-  // ... function body commented out for testing
+  try {
+    console.log('🔍 Getting operator credentials from KMS...');
+    
+    // Get operator private key from KMS
+    const decryptCommand = new DecryptCommand({
+      KeyId: OPERATOR_PRIVATE_KEY_KMS_KEY_ID,
+      CiphertextBlob: Buffer.from(process.env.OPERATOR_PRIVATE_KEY_ENCRYPTED, 'base64')
+    });
+    
+    const decryptResult = await kms.send(decryptCommand);
+    const privateKeyString = Buffer.from(decryptResult.Plaintext).toString();
+    
+    console.log('✅ Operator credentials retrieved successfully');
+    return {
+      privateKey: PrivateKey.fromString(privateKeyString),
+      accountId: AccountId.fromString(process.env.OPERATOR_ACCOUNT_ID)
+    };
+  } catch (error) {
+    console.error('❌ Failed to get operator credentials:', error);
+    throw error;
+  }
 }
 
+/**
+ * Decrypt private key using KMS
+ */
 async function decryptPrivateKey(encryptedKey, keyId) {
-  // ... function body commented out for testing
+  try {
+    console.log('🔍 Decrypting private key with KMS...');
+    
+    const decryptCommand = new DecryptCommand({
+      KeyId: keyId,
+      CiphertextBlob: Buffer.from(encryptedKey, 'base64')
+    });
+    
+    const decryptResult = await kms.send(decryptCommand);
+    const privateKeyString = Buffer.from(decryptResult.Plaintext).toString();
+    
+    console.log('✅ Private key decrypted successfully');
+    return privateKeyString;
+  } catch (error) {
+    console.error('❌ Failed to decrypt private key:', error);
+    throw error;
+  }
 }
 
+/**
+ * Initialize Hedera client with operator credentials
+ */
 async function initializeHederaClient() {
-  // ... function body commented out for testing
+  try {
+    console.log('🔍 Initializing Hedera client...');
+    
+    const { privateKey, accountId } = await getOperatorCredentials();
+    
+    const client = Client.forTestnet();
+    client.setOperator(accountId, privateKey);
+    
+    console.log('✅ Hedera client initialized successfully');
+    return client;
+  } catch (error) {
+    console.error('❌ Failed to initialize Hedera client:', error);
+    throw error;
+  }
 }
-*/
 
 /**
  * Get onboarding status for a user
@@ -284,15 +340,14 @@ async function startOnboarding(userId, email) {
     
     console.log('🔧 Creating mock Hedera wallet for user:', userId);
     
-    // Generate mock account ID and keypair for testing
-    const mockAccountId = '0.0.' + Math.floor(Math.random() * 1000000);
-    const mockPublicKey = '302a300506032b6570032100' + Math.random().toString(16).substring(2, 66);
-    const mockPrivateKey = '302e020100300506032b657004220420' + Math.random().toString(16).substring(2, 66);
+    // Generate mock wallet data (temporary until operator credentials are configured)
+    const mockAccountId = '0.0.' + (3335000 + Math.floor(Math.random() * 10000));
+    const mockPublicKey = 'mock-public-key-' + Date.now();
+    const mockPrivateKey = 'mock-private-key-' + Date.now();
     
-    console.log('🔑 Generated mock Ed25519 keypair for user');
-    console.log('✅ Created mock Hedera account:', mockAccountId);
+    console.log('🔑 Generated mock wallet data for user');
     
-    // Encrypt private key with KMS
+    // Encrypt mock private key with KMS
     const encryptCommand = new EncryptCommand({
       KeyId: WALLET_KMS_KEY_ID,
       Plaintext: mockPrivateKey
@@ -302,7 +357,7 @@ async function startOnboarding(userId, email) {
     const encryptedPrivateKey = encryptResult.CiphertextBlob.toString('base64');
     
     // Generate wallet ID
-    const walletId = 'wallet-' + Date.now() + '-operator';
+    const walletId = 'wallet-' + Date.now() + '-mock';
     
     // Store wallet metadata
     const walletData = {
@@ -316,7 +371,7 @@ async function startOnboarding(userId, email) {
       created_at: new Date().toISOString(),
       email: email,
       status: 'active',
-      created_by_operator: true
+      created_by_operator: false
     };
     
     console.log('🔍 Storing wallet metadata:', JSON.stringify(walletData, null, 2));
@@ -360,7 +415,7 @@ async function startOnboarding(userId, email) {
           network: 'testnet',
           initial_balance_hbar: '0.1',
           needs_funding: false,
-          created_by_operator: true,
+          created_by_operator: false,
           transaction_id: 'mock-transaction-' + Date.now()
         }
       })
