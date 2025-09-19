@@ -2,6 +2,37 @@
 
 Infrastructure as Code (IaC) for SafeMate blockchain document storage platform using Terraform and AWS services.
 
+## 🚀 **Current Status - September 18, 2025**
+
+### ✅ **Recently Completed**
+- **Hedera Wallet & NFT Implementation**: Major fixes completed and deployed
+- **API Gateway Routing**: All endpoints properly configured
+- **CORS Issues**: Resolved for all API endpoints
+- **Lambda Function**: Updated with real Hedera NFT service
+- **Hedera SDK Integration**: Fixed module import errors
+- **Authentication**: Cognito authorizer added to Hedera service API Gateway
+- **API Gateway Deployment**: All CORS configurations deployed to preprod
+- **Secrets Manager Removal**: Removed Secrets Manager dependency, using KMS + DynamoDB directly
+- **User Onboarding Fix**: Fixed 502 errors in onboarding service
+
+### ✅ **Fully Functional**
+- Real NFT creation on Hedera testnet
+- Wallet balance display
+- Folder creation functionality
+- Transaction history retrieval
+- Cross-origin requests from frontend
+- User onboarding with live Hedera testnet wallet creation
+
+### 📋 **Environment Details**
+- **Environment**: Preprod (ap-southeast-2)
+- **API Gateway**: `2kwe2ly8vh` - All endpoints configured
+- **Lambda Function**: `preprod-safemate-hedera-service` - Updated
+- **Network**: Hedera Testnet
+- **User**: simon.woods@tne.com.au
+- **Security**: KMS + DynamoDB (No Secrets Manager)
+- **Blockchain**: Live Hedera Testnet (No Mirror Sites)
+- **Operator Credentials**: Configured in Lambda Database
+
 ## Overview
 
 This repository contains all infrastructure components for SafeMate, including AWS Lambda functions, API Gateway, DynamoDB tables, KMS keys, and other AWS resources. All infrastructure is optimized for AWS Free Tier compliance and cost-effectiveness.
@@ -12,11 +43,18 @@ This repository contains all infrastructure components for SafeMate, including A
 
 - **AWS Lambda Functions** - Serverless compute for all backend services
 - **API Gateway** - RESTful API endpoints with CORS support
-- **DynamoDB** - NoSQL database for user data and metadata
-- **KMS** - Encryption key management for sensitive data
+- **DynamoDB** - NoSQL database for user data, metadata, and encrypted keys
+- **KMS** - Encryption key management for sensitive data and private keys
 - **Cognito** - User authentication and authorization
 - **S3** - File storage and static website hosting
 - **CloudWatch** - Logging and monitoring
+
+### Security Architecture
+
+- **KMS + DynamoDB**: All sensitive data (private keys, secrets) encrypted with KMS and stored in DynamoDB
+- **No Secrets Manager**: Removed to maintain Free Tier compliance and simplify architecture
+- **Cognito JWT**: User authentication with JWT tokens
+- **CORS Protection**: Cross-origin request security
 
 ### Free Tier Compliance
 
@@ -27,6 +65,8 @@ All infrastructure is designed to stay within AWS Free Tier limits:
 - **Cognito**: 50,000 MAUs free
 - **S3**: 5GB storage free
 - **CloudWatch**: 5GB ingestion free
+- **KMS**: 20,000 requests/month free
+- **No Secrets Manager**: Removed to avoid costs and maintain Free Tier compliance
 
 ## Directory Structure
 
@@ -291,7 +331,7 @@ All Lambda functions automatically log to CloudWatch:
 
 ### Free Tier Optimization
 - **Status**: ✅ Complete
-- **Cost**: Reduced from $100+/month to ~$1.40/month
+- **Cost**: Reduced from $100+/month to ~$1/month
 - **Compliance**: 100% Free Tier compliant
 
 ### Deployment Scripts
@@ -315,5 +355,5 @@ All Lambda functions automatically log to CloudWatch:
 
 **SafeMate Infrastructure Status**: ✅ **PRODUCTION READY**  
 **Free Tier Compliance**: ✅ **100% COMPLIANT**  
-**Cost Target**: ✅ **~$1.40/MONTH**  
+**Cost Target**: ✅ **~$1/MONTH**  
 **Last Updated**: 2025-01-15

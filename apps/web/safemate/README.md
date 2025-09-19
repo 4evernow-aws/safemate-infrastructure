@@ -52,7 +52,7 @@ Create a `.env` file in the `safemate/` directory:
 
 ```bash
 # Environment Mode
-VITE_DEMO_MODE=false                    # Set to 'true' for demo mode
+VITE_DEMO_MODE=false                    # Always false - using live Hedera testnet
 
 # Hedera Network Configuration
 VITE_HEDERA_NETWORK=testnet
@@ -107,19 +107,14 @@ cd safemate/
 npm run dev
 ```
 
-## 🔧 Environment Modes
+## 🔧 Live Hedera Testnet Integration
 
-### Demo Mode
-- **Purpose**: Quick testing and development without real blockchain
-- **Data**: Mock files, folders, and account information
-- **Setup**: Set `VITE_DEMO_MODE=true`
-- **Benefits**: No Hedera account required, instant setup
-
-### Real Mode (Hedera Testnet)
-- **Purpose**: Full blockchain integration with real Hedera network
+### Production Mode (Live Hedera Testnet)
+- **Purpose**: Full blockchain integration with live Hedera testnet
 - **Data**: Actual files stored on Hedera File Service
-- **Setup**: Set `VITE_DEMO_MODE=false` and configure Hedera account
+- **Setup**: Operator credentials configured in Lambda database
 - **Benefits**: Real blockchain transactions, true decentralization
+- **Network**: Direct connection to Hedera testnet (no mirror sites)
 
 ## 🏭 Infrastructure Components
 
@@ -133,10 +128,10 @@ npm run dev
 - **API Gateway**: REST API endpoints
 
 ### Hedera Integration
-- **File Service**: Decentralized file storage
-- **Mirror Node**: Account and transaction queries
-- **Consensus Service**: Transaction validation
-- **Token Service**: $MATE token operations
+- **File Service**: Decentralized file storage on live testnet
+- **Direct Network Access**: Real-time account and transaction queries
+- **Consensus Service**: Transaction validation on live testnet
+- **Token Service**: $MATE token operations on live testnet
 
 ## 🔐 Security Features
 

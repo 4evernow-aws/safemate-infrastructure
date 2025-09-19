@@ -176,7 +176,7 @@ const hasWallet = await ConsolidatedWalletService.hasWallet();
 ```typescript
 // Update service configuration
 ConsolidatedWalletService.updateConfig({
-  enableDemoMode: false,
+  enableLiveTestnet: true,
   enableDebugLogging: true,
   maxRetries: 5,
   retryDelay: 2000
@@ -187,8 +187,8 @@ ConsolidatedWalletService.updateConfig({
 ```typescript
 // Get network details
 const networkInfo = ConsolidatedWalletService.getNetworkInfo();
-console.log(networkInfo.network); // 'testnet' or 'mainnet'
-console.log(networkInfo.mirrorNodeUrl);
+console.log(networkInfo.network); // 'testnet' - live Hedera testnet
+console.log(networkInfo.directNodeUrl); // Direct connection to Hedera testnet
 ```
 
 ### **Account Validation**
@@ -310,7 +310,7 @@ Error handling is now more consistent across all operations, with better error m
 
 ### **4. Enhanced Features**
 - Configurable service behavior
-- Better demo mode support
+- Live Hedera testnet integration
 - Improved error messages
 - Network information utilities
 
@@ -341,7 +341,7 @@ import type { SecureWalletInfo } from './consolidatedWalletService';
 ### **Support**
 - Check the service documentation for detailed API reference
 - Review the TypeScript types for proper usage
-- Test in demo mode first before production deployment
+- Test with live Hedera testnet integration
 
 ---
 

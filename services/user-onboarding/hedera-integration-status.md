@@ -1,6 +1,6 @@
 # Hedera Wallet Integration Status
 
-## ✅ Current Status: OPERATOR ACCOUNT-BASED WALLET CREATION SUCCESSFULLY IMPLEMENTED
+## ✅ Current Status: LIVE HEDERA TESTNET WALLET CREATION OPERATIONAL
 
 ### Lambda Function Details
 - **Function Name**: `default-safemate-user-onboarding`
@@ -8,19 +8,20 @@
 - **Last Updated**: 2025-07-28T19:15:00
 - **Status**: ✅ **FULLY OPERATIONAL**
 
-### 🚀 **Operator Account-Based Wallet Creation**
+### 🚀 **Live Hedera Testnet Wallet Creation**
 
-SafeMate now uses a funded operator account for wallet creation:
+SafeMate uses live Hedera testnet for real wallet creation:
+- **Network**: Live Hedera Testnet (no mirror sites)
 - **Operator Account ID**: `0.0.6428427`
-- **Operator Private Key**: Encrypted and stored in DynamoDB
+- **Operator Private Key**: Encrypted and stored in Lambda database
 - **Initial Funding**: 0.1 HBAR per user account
-- **Immediate Activation**: Accounts are fully funded and ready to use
+- **Immediate Activation**: Real accounts created on Hedera testnet
 
 ### 🔧 **How It Works**
 1. **Generate Ed25519 keypair** for each user
-2. **Use operator account** to create funded Hedera account
-3. **Encrypt private key with KMS** and store in DynamoDB
-4. **User receives fully funded account** with 0.1 HBAR balance
+2. **Use operator account** to create funded Hedera account on live testnet
+3. **Encrypt private key with KMS** and store in Lambda database
+4. **User receives real Hedera testnet account** with 0.1 HBAR balance
 
 ### 📊 **Successfully Tested Response**
 ```json
@@ -34,7 +35,7 @@ SafeMate now uses a funded operator account for wallet creation:
   "balance": "0.1 HBAR",
   "created_by_operator": true,
   "initial_funding": "0.1 HBAR",
-  "message": "Secure wallet created with operator account funding"
+  "message": "Real Hedera testnet wallet created with operator account funding"
 }
 ```
 

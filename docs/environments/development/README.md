@@ -11,7 +11,7 @@ The SafeMate development environment is designed for local development and testi
 - **AWS Region**: `us-east-1`
 - **Hedera Network**: `testnet`
 - **Debug Mode**: ✅ Enabled
-- **Demo Mode**: ✅ Enabled
+- **Live Hedera Testnet**: ✅ Enabled
 - **Cost Profile**: Free Tier (~$1.40/month)
 - **Deployment Method**: Manual via PowerShell scripts
 
@@ -20,7 +20,7 @@ The SafeMate development environment is designed for local development and testi
 - **AWS Integration**: Lambda, API Gateway, DynamoDB, Cognito
 - **Blockchain Integration**: Hedera Testnet
 - **Debug Tools**: Enhanced logging and error reporting
-- **Demo Data**: Pre-configured test data for development
+- **Live Blockchain Data**: Real Hedera testnet integration for development
 
 ## 🛠️ **Setup Instructions**
 
