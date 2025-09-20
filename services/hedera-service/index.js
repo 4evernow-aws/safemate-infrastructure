@@ -15,6 +15,7 @@
  * Last Updated: September 20, 2025
  * Status: Live Hedera testnet integration active
  * Added: /transactions and /balance endpoints for wallet operations
+ * Fixed: Transaction data mapping to return array format for frontend compatibility
  */
 
 const { randomUUID } = require('crypto');
@@ -1783,7 +1784,7 @@ exports.handler = async (event) => {
       const result = await getAccountTransactions(accountId, limit);
       return createResponse(200, { 
         success: true, 
-        data: result 
+        data: result.transactions || [] 
       }, event);
     } else if (cleanPath === '/balance' && httpMethod === 'GET') {
       // Get account balance
