@@ -21,7 +21,7 @@ Infrastructure as Code (IaC) for SafeMate blockchain document storage platform u
 - Folder creation functionality
 - Transaction history retrieval
 - Cross-origin requests from frontend
-- User onboarding with live Hedera testnet wallet creation
+- User onboarding with REAL Hedera testnet wallet creation (NO MOCK WALLETS)
 
 ### 📋 **Environment Details**
 - **Environment**: Preprod (ap-southeast-2)
@@ -31,7 +31,8 @@ Infrastructure as Code (IaC) for SafeMate blockchain document storage platform u
 - **User**: simon.woods@tne.com.au
 - **Security**: KMS + DynamoDB (No Secrets Manager)
 - **Blockchain**: Live Hedera Testnet (No Mirror Sites)
-- **Operator Credentials**: Configured in Lambda Database
+- **Operator Credentials**: ✅ Real operator account configured (0.0.6428427)
+- **Wallet Policy**: ✅ REAL WALLETS ONLY - NO MOCK WALLETS
 
 ## Overview
 

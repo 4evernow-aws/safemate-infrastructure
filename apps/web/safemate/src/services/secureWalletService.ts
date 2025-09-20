@@ -2,6 +2,7 @@ import { hederaConfig } from '../amplify-config';
 import { config } from '../config/environment';
 import { UserService } from './userService';
 import { TokenService } from './tokenService';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import type {
   HederaWallet,
   WalletMetadata,
@@ -321,17 +322,33 @@ export class SecureWalletService {
   }
 
   /**
-   * Get wallet balance from Hedera network
+   * Get wallet balance from Hedera network via API Gateway
    */
   static async getSecureWalletBalance(accountAlias: string): Promise<WalletBalance | null> {
     try {
       console.log('🔍 SecureWalletService: Fetching balance for account:', accountAlias);
-      console.log('🔍 SecureWalletService: Mirror Node URL:', this.MIRROR_NODE_URL);
       
-      const url = `${this.MIRROR_NODE_URL}/accounts/${accountAlias}`;
+      // Use the Hedera API Gateway endpoint instead of mirror node
+      const hederaApiUrl = 'https://2kwe2ly8vh.execute-api.ap-southeast-2.amazonaws.com/preprod';
+      const url = `${hederaApiUrl}/balance?accountId=${accountAlias}`;
       console.log('🔍 SecureWalletService: Balance URL:', url);
       
-      const response = await fetch(url);
+      // Get authentication token
+      const session = await fetchAuthSession();
+      const token = session.tokens?.idToken?.toString();
+      
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
       
       console.log('🔍 SecureWalletService: Balance response status:', response.status);
       
@@ -344,21 +361,14 @@ export class SecureWalletService {
       const data = await response.json();
       console.log('🔍 SecureWalletService: Balance response data:', data);
       
-      if (data.balance) {
-        const hbarBalance = data.balance.balance / 100000000; // Convert tinybars to HBAR
-        console.log('✅ SecureWalletService: Balance converted:', hbarBalance, 'HBAR');
+      if (data.success && data.data && data.data.balance) {
+        // Parse the balance from our API Gateway response
+        const balanceStr = data.data.balance.replace(' ℏ', ''); // Remove ℏ symbol
+        const hbarBalance = parseFloat(balanceStr);
+        console.log('✅ SecureWalletService: Balance parsed:', hbarBalance, 'HBAR');
         return {
           hbar: hbarBalance,
-          usd: hbarBalance * 0.05, // Approximate USD value (you might want to fetch real-time rates)
-          lastUpdated: new Date().toISOString()
-        };
-      } else if (data.balances && data.balances.length > 0) {
-        // Alternative balance format
-        const hbarBalance = data.balances[0].balance / 100000000;
-        console.log('✅ SecureWalletService: Balance from balances array:', hbarBalance, 'HBAR');
-        return {
-          hbar: hbarBalance,
-          usd: hbarBalance * 0.05,
+          usd: hbarBalance * 0.05, // Approximate USD value
           lastUpdated: new Date().toISOString()
         };
       }

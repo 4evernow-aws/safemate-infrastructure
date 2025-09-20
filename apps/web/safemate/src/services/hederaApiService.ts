@@ -42,7 +42,8 @@ interface HederaToken {
   createdAt: string;
 }
 export class HederaApiService {
-  private static readonly API_BASE_URL = getHederaApiUrl('');
+  // Use the correct API Gateway URL for preprod environment
+  private static readonly API_BASE_URL = 'https://2kwe2ly8vh.execute-api.ap-southeast-2.amazonaws.com/preprod';
 
   /**
    * List all folders for the current user

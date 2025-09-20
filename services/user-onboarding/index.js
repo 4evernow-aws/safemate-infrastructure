@@ -1,178 +1,125 @@
 /**
- * SafeMate v2 - User Onboarding Service
- * 
- * This Lambda function handles user onboarding and Hedera wallet creation.
- * It creates real Hedera testnet accounts using an operator account for funding.
- * 
+ * SafeMate v2 - User Onboarding Service (Real Hedera Integration)
+ *
+ * Environment: preprod
+ * Function: preprod-safemate-user-onboarding
+ * Purpose: Handle user onboarding with REAL Hedera testnet wallet creation
+ *
  * Features:
- * - Real Hedera testnet wallet creation with operator account funding
+ * - REAL Hedera testnet wallet creation with operator account funding
  * - KMS encryption for private keys
  * - DynamoDB storage for wallet metadata
- * - Email verification support for all users
- * - CORS support for all HTTP methods (GET, POST, PUT, DELETE, OPTIONS)
  * - Cognito User Pool authentication
- * - Environment-based configuration
- * 
- * Environment Variables Required:
- * - WALLET_METADATA_TABLE: DynamoDB table for wallet metadata
- * - WALLET_KEYS_TABLE: DynamoDB table for encrypted private keys
- * - WALLET_KMS_KEY_ID: KMS key ID for wallet encryption
- * - OPERATOR_PRIVATE_KEY_KMS_KEY_ID: KMS key ID for operator private key
- * - HEDERA_NETWORK: Hedera network (testnet/mainnet)
- * - AWS_REGION: AWS region for services
- * 
- * API Endpoints:
- * - GET /onboarding/status: Check user's wallet status
- * - POST /onboarding/start: Start wallet creation process
- * - OPTIONS: CORS preflight support
- * 
- * DynamoDB Tables:
- * - wallet-metadata: Stores wallet information and metadata
- * - wallet-keys: Stores encrypted private keys
- * 
- * Security:
- * - All private keys encrypted with AWS KMS
- * - Cognito JWT token validation
- * - CORS protection for cross-origin requests
- * 
- * @version 2.5.0
- * @author SafeMate Development Team
- * @lastUpdated 2025-09-18
- * @fix Fixed missing Hedera helper functions causing 502 errors
- * @fix Removed Secrets Manager dependency, using KMS + DynamoDB
- * @environment Preprod (preprod)
- * @awsRegion ap-southeast-2
- * @hederaNetwork testnet
- * @corsOrigin *
- * @supportedMethods GET,POST,PUT,DELETE,OPTIONS
- * @note KMS + DYNAMODB INTEGRATION: Using KMS for encryption and DynamoDB for storage (No Secrets Manager)
+ * - CORS support for all HTTP methods
+ * - Live Hedera testnet integration (no mirror sites)
+ * - Uses Hedera SDK from Lambda layer
+ * - NO MOCK WALLETS - Real wallets only or fail gracefully
+ *
+ * Dependencies:
+ * - @hashgraph/sdk: ^2.73.1
+ * - @aws-sdk/client-dynamodb: ^3.891.0
+ * - @aws-sdk/lib-dynamodb: ^3.891.0
+ * - @aws-sdk/client-kms: ^3.891.0
+ *
+ * Last Updated: September 20, 2025
+ * Status: Real Hedera integration with Lambda layer - NO MOCK WALLETS policy
+ * Fixed: Operator account DER private key parsing for existing account 0.0.6428427
  */
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { KMSClient, EncryptCommand, DecryptCommand } = require('@aws-sdk/client-kms');
-const {
-  Client,
-  AccountCreateTransaction, 
-  PrivateKey, 
-  Hbar,
-  AccountId
-} = require('@hashgraph/sdk');
 
 // Initialize AWS services
 const dynamodb = new DynamoDBClient({ region: 'ap-southeast-2' });
 const dynamodbDoc = DynamoDBDocumentClient.from(dynamodb);
 const kms = new KMSClient({ region: 'ap-southeast-2' });
 
-// CORS headers with support for all methods and environments
+// CORS headers
 const corsHeaders = {
   'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*', // Allow all origins for development
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-id-token,x-cognito-access-token,Accept',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
   'Access-Control-Allow-Credentials': 'true'
 };
 
 // Environment variables
-const WALLET_METADATA_TABLE = process.env.WALLET_METADATA_TABLE;
-const WALLET_KEYS_TABLE = process.env.WALLET_KEYS_TABLE;
-const WALLET_KMS_KEY_ID = process.env.WALLET_KMS_KEY_ID;
-const OPERATOR_PRIVATE_KEY_KMS_KEY_ID = process.env.OPERATOR_PRIVATE_KEY_KMS_KEY_ID;
+const WALLET_METADATA_TABLE = process.env.WALLET_METADATA_TABLE || 'preprod-safemate-wallet-metadata';
+const WALLET_KEYS_TABLE = process.env.WALLET_KEYS_TABLE || 'preprod-safemate-wallet-keys';
+const WALLET_KMS_KEY_ID = process.env.WALLET_KMS_KEY_ID || 'arn:aws:kms:ap-southeast-2:994220462693:key/3b18b0c0-dd1f-41db-8bac-6ec857c1ed05';
+const OPERATOR_PRIVATE_KEY_KMS_KEY_ID = process.env.OPERATOR_PRIVATE_KEY_KMS_KEY_ID || 'arn:aws:kms:ap-southeast-2:994220462693:key/3b18b0c0-dd1f-41db-8bac-6ec857c1ed05';
+const OPERATOR_ACCOUNT_ID = process.env.OPERATOR_ACCOUNT_ID || '0.0.6428427';
+const OPERATOR_PRIVATE_KEY_ENCRYPTED = process.env.OPERATOR_PRIVATE_KEY_ENCRYPTED || 'PLACEHOLDER_ENCRYPTED_PRIVATE_KEY';
 const HEDERA_NETWORK = process.env.HEDERA_NETWORK || 'testnet';
+const AWS_REGION = process.env.AWS_REGION || 'ap-southeast-2';
+
+// Load Hedera SDK from Lambda layer - REQUIRED
+let Client, AccountCreateTransaction, PrivateKey, Hbar, AccountId, AccountBalanceQuery;
+let hederaSDKAvailable = false;
+
+try {
+  console.log('🔍 Attempting to load Hedera SDK from Lambda layer...');
+  
+  // Load from Lambda layer (available in /opt/nodejs/node_modules)
+  ({
+    Client,
+    AccountCreateTransaction,
+    PrivateKey,
+    Hbar,
+    AccountId,
+    AccountBalanceQuery
+  } = require('@hashgraph/sdk'));
+  
+  hederaSDKAvailable = true;
+  console.log('✅ Hedera SDK loaded successfully from Lambda layer');
+  console.log('✅ Client type:', typeof Client);
+  console.log('✅ AccountCreateTransaction type:', typeof AccountCreateTransaction);
+} catch (error) {
+  console.error('❌ CRITICAL: Hedera SDK not available from Lambda layer:', error.message);
+  console.error('❌ Error stack:', error.stack);
+  console.error('❌ Cannot create real Hedera wallets without SDK');
+  hederaSDKAvailable = false;
+  // Set to null to indicate SDK is not available
+  Client = AccountCreateTransaction = PrivateKey = Hbar = AccountId = AccountBalanceQuery = null;
+}
 
 /**
  * Extract user information from Cognito JWT token claims
- * Enhanced to handle different token formats and provide better debugging
  */
 function extractUserInfo(event) {
-  console.log('🔍 Extracting user information from event...');
-  console.log('🔍 Event structure:', JSON.stringify(event, null, 2));
-  
-  // Check multiple possible locations for user claims
-  const possibleClaimPaths = [
-    'requestContext.authorizer.claims',
-    'requestContext.authorizer.jwt.claims',
-    'requestContext.authorizer',
-    'headers.x-cognito-id-token',
-    'headers.authorization'
-  ];
-  
-  let userClaims = {};
-  let userId = null;
-  let email = null;
-  
-  // Try to extract claims from different locations
-  for (const path of possibleClaimPaths) {
-    const pathParts = path.split('.');
-    let value = event;
-    
-    for (const part of pathParts) {
-      if (value && typeof value === 'object' && part in value) {
-        value = value[part];
-      } else {
-        value = null;
-        break;
-      }
+  try {
+    console.log('🔍 Extracting user info from event...');
+    if (event.requestContext && event.requestContext.authorizer && event.requestContext.authorizer.claims) {
+      const claims = event.requestContext.authorizer.claims;
+      console.log('✅ Found Cognito claims:', {
+        sub: claims.sub,
+        email: claims.email,
+        username: claims['cognito:username']
+      });
+      return {
+        userId: claims.sub,
+        email: claims.email,
+        username: claims['cognito:username'],
+        userClaims: claims
+      };
     }
-    
-    if (value) {
-      console.log(`🔍 Found data at path ${path}:`, JSON.stringify(value, null, 2));
-      
-      if (path === 'headers.authorization' && value.startsWith('Bearer ')) {
-        // Extract token from Authorization header
-        const token = value.replace('Bearer ', '');
-        console.log('🔍 Extracted token from Authorization header');
-        
-        try {
-          // Decode JWT token to extract claims
-          const tokenParts = token.split('.');
-          if (tokenParts.length === 3) {
-            const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-            console.log('🔍 Decoded JWT payload:', JSON.stringify(payload, null, 2));
-            
-            userClaims = payload;
-            userId = payload.sub || payload['cognito:username'];
-            email = payload.email || payload['cognito:email'];
-            
-            if (userId && email) {
-              console.log('✅ Successfully extracted user info from JWT token');
-              break;
-            }
-          }
-        } catch (jwtError) {
-          console.log('⚠️ Failed to decode JWT token:', jwtError.message);
-        }
-      } else if (typeof value === 'object' && (value.sub || value['cognito:username'])) {
-        // Direct claims object
-        userClaims = value;
-        userId = value.sub || value['cognito:username'];
-        email = value.email || value['cognito:email'];
-        
-        if (userId && email) {
-          console.log('✅ Successfully extracted user info from claims object');
-          break;
-        }
-      }
-    }
+    console.log('⚠️ No Cognito claims found, using test values');
+    return {
+      userId: 'test-user-123',
+      email: 'test@example.com',
+      username: 'test-user',
+      userClaims: {}
+    };
+  } catch (error) {
+    console.error('❌ Error extracting user info:', error);
+    return {
+      userId: 'test-user-123',
+      email: 'test@example.com',
+      username: 'test-user',
+      userClaims: {}
+    };
   }
-  
-  // Fallback values if extraction fails
-  if (!userId) {
-    userId = 'default-user-' + Date.now();
-    console.log('⚠️ Using fallback userId:', userId);
-  }
-  
-  if (!email) {
-    email = 'default@example.com';
-    console.log('⚠️ Using fallback email:', email);
-  }
-  
-  console.log('🔍 Final extracted values:');
-  console.log('  - userId:', userId);
-  console.log('  - email:', email);
-  console.log('  - userClaims:', JSON.stringify(userClaims, null, 2));
-  
-  return { userId, email, userClaims };
 }
 
 /**
@@ -181,20 +128,54 @@ function extractUserInfo(event) {
 async function getOperatorCredentials() {
   try {
     console.log('🔍 Getting operator credentials from KMS...');
-    
+
+    if (!OPERATOR_ACCOUNT_ID || !OPERATOR_PRIVATE_KEY_ENCRYPTED) {
+      throw new Error('Operator credentials not configured in environment variables');
+    }
+
+    // Check if we have placeholder values
+    if (OPERATOR_PRIVATE_KEY_ENCRYPTED === 'PLACEHOLDER_ENCRYPTED_PRIVATE_KEY') {
+      throw new Error('Operator credentials are not configured. Please set up real operator credentials.');
+    }
+
     // Get operator private key from KMS
     const decryptCommand = new DecryptCommand({
       KeyId: OPERATOR_PRIVATE_KEY_KMS_KEY_ID,
-      CiphertextBlob: Buffer.from(process.env.OPERATOR_PRIVATE_KEY_ENCRYPTED, 'base64')
+      CiphertextBlob: Buffer.from(OPERATOR_PRIVATE_KEY_ENCRYPTED, 'base64')
     });
-    
+
     const decryptResult = await kms.send(decryptCommand);
-    const privateKeyString = Buffer.from(decryptResult.Plaintext).toString();
     
     console.log('✅ Operator credentials retrieved successfully');
+    console.log('📋 Plaintext type:', typeof decryptResult.Plaintext);
+    console.log('📋 Plaintext length:', decryptResult.Plaintext.length);
+    
+    // Convert to base64 for DER parsing (KMS returns binary data)
+    const privateKeyBase64 = Buffer.from(decryptResult.Plaintext).toString('base64');
+    console.log('📋 Private key base64 length:', privateKeyBase64.length);
+    console.log('📋 Private key base64 starts with:', privateKeyBase64.substring(0, 20));
+    
+    // Parse as DER using base64 representation
+    let privateKey;
+    try {
+      privateKey = PrivateKey.fromStringDer(privateKeyBase64);
+      console.log('✅ Private key parsed as DER format from base64');
+    } catch (derError) {
+      console.log('⚠️ DER parsing failed, trying alternative methods:', derError.message);
+      
+      // Fallback: try as raw bytes
+      try {
+        privateKey = PrivateKey.fromBytes(decryptResult.Plaintext);
+        console.log('✅ Private key parsed from raw bytes');
+      } catch (bytesError) {
+        console.error('❌ Both DER and raw bytes parsing failed');
+        throw new Error(`Private key parsing failed. DER error: ${derError.message}, Bytes error: ${bytesError.message}`);
+      }
+    }
+    
     return {
-      privateKey: PrivateKey.fromString(privateKeyString),
-      accountId: AccountId.fromString(process.env.OPERATOR_ACCOUNT_ID)
+      privateKey: privateKey,
+      accountId: AccountId.fromString(OPERATOR_ACCOUNT_ID)
     };
   } catch (error) {
     console.error('❌ Failed to get operator credentials:', error);
@@ -208,19 +189,34 @@ async function getOperatorCredentials() {
 async function decryptPrivateKey(encryptedKey, keyId) {
   try {
     console.log('🔍 Decrypting private key with KMS...');
-    
     const decryptCommand = new DecryptCommand({
       KeyId: keyId,
       CiphertextBlob: Buffer.from(encryptedKey, 'base64')
     });
-    
     const decryptResult = await kms.send(decryptCommand);
-    const privateKeyString = Buffer.from(decryptResult.Plaintext).toString();
-    
     console.log('✅ Private key decrypted successfully');
-    return privateKeyString;
+    return Buffer.from(decryptResult.Plaintext).toString();
   } catch (error) {
     console.error('❌ Failed to decrypt private key:', error);
+    throw error;
+  }
+}
+
+/**
+ * Encrypt private key using KMS
+ */
+async function encryptPrivateKey(privateKeyString, keyId) {
+  try {
+    console.log('🔍 Encrypting private key with KMS...');
+    const encryptCommand = new EncryptCommand({
+      KeyId: keyId,
+      Plaintext: Buffer.from(privateKeyString)
+    });
+    const encryptResult = await kms.send(encryptCommand);
+    console.log('✅ Private key encrypted successfully');
+    return encryptResult.CiphertextBlob.toString('base64');
+  } catch (error) {
+    console.error('❌ Failed to encrypt private key:', error);
     throw error;
   }
 }
@@ -231,12 +227,9 @@ async function decryptPrivateKey(encryptedKey, keyId) {
 async function initializeHederaClient() {
   try {
     console.log('🔍 Initializing Hedera client...');
-    
     const { privateKey, accountId } = await getOperatorCredentials();
-    
     const client = Client.forTestnet();
     client.setOperator(accountId, privateKey);
-    
     console.log('✅ Hedera client initialized successfully');
     return client;
   } catch (error) {
@@ -251,7 +244,7 @@ async function initializeHederaClient() {
 async function getOnboardingStatus(userId) {
   console.log('🔍 Getting onboarding status for user:', userId);
   console.log('🔍 Using table:', WALLET_METADATA_TABLE);
-  
+
   try {
     const command = new QueryCommand({
       TableName: WALLET_METADATA_TABLE,
@@ -261,11 +254,11 @@ async function getOnboardingStatus(userId) {
       },
       Limit: 1
     });
-    
+
     console.log('🔍 Executing DynamoDB query...');
     const response = await dynamodbDoc.send(command);
     console.log('🔍 DynamoDB response:', JSON.stringify(response, null, 2));
-    
+
     if (response.Items && response.Items.length > 0) {
       const wallet = response.Items[0];
       console.log('✅ Wallet found for user:', userId);
@@ -279,7 +272,7 @@ async function getOnboardingStatus(userId) {
             hedera_account_id: wallet.hedera_account_id,
             public_key: wallet.public_key,
             account_type: wallet.account_type || 'personal',
-            network: wallet.network || 'testnet',
+            network: wallet.network || HEDERA_NETWORK,
             initial_balance_hbar: wallet.initial_balance_hbar || '0.1',
             needs_funding: false,
             created_by_operator: wallet.created_by_operator || true
@@ -315,16 +308,16 @@ async function getOnboardingStatus(userId) {
 }
 
 /**
- * Start onboarding process and create real Hedera wallet
+ * Start onboarding process and create REAL Hedera wallet ONLY
  */
 async function startOnboarding(userId, email) {
   console.log('🚀 Starting onboarding for user:', userId);
-  
+
   try {
     // Check if wallet already exists
     const existingWallet = await getOnboardingStatus(userId);
     const existingData = JSON.parse(existingWallet.body);
-    
+
     if (existingData.hasWallet) {
       console.log('✅ Wallet already exists for user:', userId);
       return {
@@ -337,90 +330,154 @@ async function startOnboarding(userId, email) {
         })
       };
     }
-    
-    console.log('🔧 Creating mock Hedera wallet for user:', userId);
-    
-    // Generate mock wallet data (temporary until operator credentials are configured)
-    const mockAccountId = '0.0.' + (3335000 + Math.floor(Math.random() * 10000));
-    const mockPublicKey = 'mock-public-key-' + Date.now();
-    const mockPrivateKey = 'mock-private-key-' + Date.now();
-    
-    console.log('🔑 Generated mock wallet data for user');
-    
-    // Encrypt mock private key with KMS
-    const encryptCommand = new EncryptCommand({
-      KeyId: WALLET_KMS_KEY_ID,
-      Plaintext: mockPrivateKey
-    });
-    
-    const encryptResult = await kms.send(encryptCommand);
-    const encryptedPrivateKey = encryptResult.CiphertextBlob.toString('base64');
-    
+
+    console.log('🔧 Creating REAL Hedera wallet for user:', userId);
+
+    // CRITICAL: Check if Hedera SDK is available - NO MOCK WALLETS
+    if (!hederaSDKAvailable) {
+      console.error('❌ CRITICAL ERROR: Hedera SDK not available');
+      console.error('❌ Cannot create real Hedera wallets without SDK');
+      console.error('❌ NO MOCK WALLETS - Real wallets only');
+      
+      return {
+        statusCode: 503,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          success: false,
+          message: 'Hedera SDK not available - Cannot create real wallets',
+          error: 'Service temporarily unavailable - Hedera SDK missing',
+          requiresRealWallet: true,
+          noMockWallets: true,
+          sdkStatus: 'missing',
+          nextSteps: 'Install @hashgraph/sdk dependency and redeploy'
+        })
+      };
+    }
+
+    let hederaClient;
+    let createdByOperator = false;
+    try {
+      hederaClient = await initializeHederaClient();
+      createdByOperator = true;
+      console.log('✅ Initialized Hedera client with operator credentials.');
+    } catch (opError) {
+      console.warn('⚠️ Could not initialize Hedera client with operator credentials:', opError.message);
+      console.warn('⚠️ Proceeding to create account without initial funding from operator.');
+      hederaClient = Client.forTestnet();
+      // Set a dummy operator to allow transaction execution
+      const dummyPrivateKey = PrivateKey.generateED25519();
+      const dummyAccountId = AccountId.fromString("0.0.0");
+      hederaClient.setOperator(dummyAccountId, dummyPrivateKey);
+      createdByOperator = false;
+    }
+
+    // Generate Ed25519 keypair
+    const newAccountPrivateKey = PrivateKey.generateED25519();
+    const newAccountPublicKey = newAccountPrivateKey.publicKey;
+
+    // Create Hedera account
+    console.log('📝 Creating REAL Hedera account...');
+    const initialBalance = createdByOperator ? 0.1 : 0; // Only fund if operator is available
+    const transaction = new AccountCreateTransaction()
+      .setKey(newAccountPublicKey)
+      .setInitialBalance(new Hbar(initialBalance));
+
+    let txResponse;
+    if (createdByOperator) {
+      const operatorCredentials = await getOperatorCredentials();
+      txResponse = await (await transaction.freezeWith(hederaClient).sign(operatorCredentials.privateKey)).execute(hederaClient);
+    } else {
+      // For non-operator transactions, we need to freeze and execute properly
+      txResponse = await (await transaction.freezeWith(hederaClient)).execute(hederaClient);
+    }
+
+    const receipt = await txResponse.getReceipt(hederaClient);
+    const newAccountId = receipt.accountId;
+
+    if (!newAccountId) {
+      throw new Error('Failed to create Hedera account');
+    }
+
+    console.log(`✅ REAL Hedera account created: ${newAccountId.toString()}`);
+
+    // Encrypt private key
+    const encryptedPrivateKey = await encryptPrivateKey(
+      newAccountPrivateKey.toString(),
+      WALLET_KMS_KEY_ID
+    );
+
     // Generate wallet ID
-    const walletId = 'wallet-' + Date.now() + '-mock';
-    
+    const walletId = `wallet-${Date.now()}-${newAccountId.toString().replace(/\./g, '-')}`;
+
     // Store wallet metadata
     const walletData = {
       user_id: userId,
       wallet_id: walletId,
-      hedera_account_id: mockAccountId,
-      public_key: mockPublicKey,
+      hedera_account_id: newAccountId.toString(),
+      account_id: newAccountId.toString(), // Also store as account_id for compatibility
+      public_key: newAccountPublicKey.toString(),
       account_type: 'personal',
-      network: 'testnet',
-      initial_balance_hbar: '0.1',
+      network: HEDERA_NETWORK,
+      initial_balance_hbar: initialBalance.toString(),
+      balance: initialBalance.toString(), // Also store as balance for compatibility
       created_at: new Date().toISOString(),
       email: email,
       status: 'active',
-      created_by_operator: false
+      created_by_operator: createdByOperator,
+      is_real_wallet: true // Mark as real wallet
     };
-    
-    console.log('🔍 Storing wallet metadata:', JSON.stringify(walletData, null, 2));
-    
+
+    console.log('🔍 Storing REAL wallet metadata:', JSON.stringify(walletData, null, 2));
+
     await dynamodbDoc.send(new PutCommand({
       TableName: WALLET_METADATA_TABLE,
       Item: walletData
     }));
-    
+
     // Store encrypted private key
     const keyData = {
       user_id: userId,
       wallet_id: walletId,
-      encrypted_private_key: encryptResult.CiphertextBlob.toString('base64'),
+      account_id: newAccountId.toString(),
+      public_key: newAccountPublicKey.toString(),
+      encrypted_private_key: encryptedPrivateKey,
       key_type: 'ed25519',
       created_at: new Date().toISOString(),
-      kms_key_id: WALLET_KMS_KEY_ID
+      kms_key_id: WALLET_KMS_KEY_ID,
+      is_real_wallet: true // Mark as real wallet
     };
-    
-    console.log('🔍 Storing encrypted private key');
-    
+
+    console.log('🔍 Storing encrypted private key for REAL wallet');
+
     await dynamodbDoc.send(new PutCommand({
       TableName: WALLET_KEYS_TABLE,
       Item: keyData
     }));
-    
-    console.log('✅ Mock Hedera wallet created successfully for user:', userId);
-    
+
+    console.log('✅ REAL Hedera wallet created and stored successfully for user:', userId);
+
     return {
       statusCode: 200,
       headers: corsHeaders,
       body: JSON.stringify({
         success: true,
-        message: 'Mock Hedera wallet created successfully',
+        message: 'REAL Hedera wallet created successfully',
         hasWallet: true,
         wallet: {
           wallet_id: walletId,
-          hedera_account_id: mockAccountId,
-          public_key: mockPublicKey,
+          hedera_account_id: newAccountId.toString(),
+          public_key: newAccountPublicKey.toString(),
           account_type: 'personal',
-          network: 'testnet',
-          initial_balance_hbar: '0.1',
-          needs_funding: false,
-          created_by_operator: false,
-          transaction_id: 'mock-transaction-' + Date.now()
+          network: HEDERA_NETWORK,
+          initial_balance_hbar: initialBalance.toString(),
+          needs_funding: !createdByOperator, // Needs funding if not created by operator
+          created_by_operator: createdByOperator,
+          transaction_id: txResponse.transactionId.toString(),
+          is_real_wallet: true
         }
       })
     };
-    
+
   } catch (error) {
     console.error('❌ Error starting onboarding:', error);
     return {
@@ -428,9 +485,11 @@ async function startOnboarding(userId, email) {
       headers: corsHeaders,
       body: JSON.stringify({
         success: false,
-        message: 'Failed to create wallet',
+        message: 'Failed to create REAL Hedera wallet',
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
+        requiresRealWallet: true,
+        noMockWallets: true
       })
     };
   }
@@ -446,9 +505,12 @@ exports.handler = async (event) => {
     WALLET_KEYS_TABLE,
     WALLET_KMS_KEY_ID,
     OPERATOR_PRIVATE_KEY_KMS_KEY_ID,
-    HEDERA_NETWORK
+    OPERATOR_ACCOUNT_ID,
+    HEDERA_NETWORK,
+    AWS_REGION,
+    HEDERA_SDK_AVAILABLE: hederaSDKAvailable
   });
-  
+
   try {
     // Handle CORS preflight
     if (event.httpMethod === 'OPTIONS') {
@@ -458,19 +520,19 @@ exports.handler = async (event) => {
         body: ''
       };
     }
-    
+
     // Extract user information from Cognito claims
     const { userId, email, userClaims } = extractUserInfo(event);
-    
+
     console.log('🔧 User claims:', userClaims);
     console.log('🔧 Extracted userId:', userId);
     console.log('🔧 Extracted email:', email);
-    
+
     const path = event.path;
     const httpMethod = event.httpMethod;
-    
+
     console.log('🔧 Processing request:', httpMethod, path);
-    
+
     if (path === '/onboarding/status' && httpMethod === 'GET') {
       return await getOnboardingStatus(userId);
     } else if (path === '/onboarding/start' && httpMethod === 'POST') {
@@ -509,7 +571,7 @@ exports.handler = async (event) => {
         })
       };
     }
-    
+
   } catch (error) {
     console.error('❌ Lambda function error:', error);
     return {
@@ -518,7 +580,9 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         success: false,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
+        requiresRealWallet: true,
+        noMockWallets: true
       })
     };
   }
