@@ -1,9 +1,9 @@
 # Lambda layer for Hedera SDK dependencies
 resource "aws_lambda_layer_version" "hedera_dependencies_layer" {
-  filename         = "hedera-layer-minimal.zip"
+  filename         = "lambda-layer/hedera-layer.zip"
   layer_name       = "${local.name_prefix}-hedera-dependencies"
   description      = "Layer containing Hedera SDK and AWS SDK dependencies - Minimal essential dependencies"
-  source_code_hash = filebase64sha256("hedera-layer-minimal.zip")
+  source_code_hash = filebase64sha256("lambda-layer/hedera-layer.zip")
 
   compatible_runtimes = ["nodejs18.x"]
 
@@ -14,11 +14,11 @@ resource "aws_lambda_layer_version" "hedera_dependencies_layer" {
 
 # Token Vault Lambda Function
 resource "aws_lambda_function" "token_vault" {
-  filename         = "../services/token-vault/token-vault.zip"
+  filename         = "services/token-vault/token-vault.zip"
   function_name    = "${local.name_prefix}-token-vault"
   role            = aws_iam_role.vault_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("../services/token-vault/token-vault.zip")
+  source_code_hash = filebase64sha256("services/token-vault/token-vault.zip")
   runtime         = "nodejs18.x"
   timeout         = 30
   
@@ -53,11 +53,11 @@ resource "aws_lambda_function" "token_vault" {
 # Hedera Service Lambda Function (Comprehensive blockchain operations)
 # Hedera Service Lambda Function (Comprehensive blockchain operations)
 resource "aws_lambda_function" "hedera_service" {
-  filename         = "../services/hedera-service/hedera-service.zip"
+  filename         = "services/hedera-service/hedera-service.zip"
   function_name    = "${local.name_prefix}-hedera-service"
   role            = aws_iam_role.hedera_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("../services/hedera-service/hedera-service.zip")
+  source_code_hash = filebase64sha256("services/hedera-service/hedera-service.zip")
   runtime         = "nodejs18.x"
   timeout         = 90  # Longer timeout for complex blockchain operations
   
@@ -99,11 +99,11 @@ resource "aws_lambda_function" "hedera_service" {
 
 # Wallet Manager Lambda Function
 resource "aws_lambda_function" "wallet_manager" {
-  filename         = "../services/wallet-manager/wallet-manager.zip"
+  filename         = "services/wallet-manager/wallet-manager.zip"
   function_name    = "${local.name_prefix}-wallet-manager"
   role            = aws_iam_role.wallet_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("../services/wallet-manager/wallet-manager.zip")
+  source_code_hash = filebase64sha256("services/wallet-manager/wallet-manager.zip")
   runtime         = "nodejs18.x"
   timeout         = 60  # Longer timeout for Hedera operations
   
@@ -140,11 +140,11 @@ resource "aws_lambda_function" "wallet_manager" {
 
 # User Onboarding Lambda Function
 resource "aws_lambda_function" "user_onboarding" {
-  filename         = "../services/user-onboarding/user-onboarding.zip"
+  filename         = "services/user-onboarding/user-onboarding.zip"
   function_name    = "${local.name_prefix}-user-onboarding"
   role            = aws_iam_role.user_onboarding_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("../services/user-onboarding/user-onboarding.zip")
+  source_code_hash = filebase64sha256("services/user-onboarding/user-onboarding.zip")
   runtime         = "nodejs18.x"
   timeout         = 90
   memory_size     = 512
@@ -263,11 +263,11 @@ resource "aws_iam_role_policy_attachment" "directory_creator_lambda_permissions"
 
 # SafeMate Directory Creator Lambda Function
 resource "aws_lambda_function" "safemate_directory_creator" {
-  filename         = "../services/safemate-directory-creator/safemate-directory-creator.zip"
+  filename         = "services/safemate-directory-creator/safemate-directory-creator.zip"
   function_name    = "${local.name_prefix}-directory-creator"
   role            = aws_iam_role.directory_creator_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("../services/safemate-directory-creator/safemate-directory-creator.zip")
+  source_code_hash = filebase64sha256("services/safemate-directory-creator/safemate-directory-creator.zip")
   runtime         = "nodejs18.x"
   timeout         = 90
   memory_size     = 512
@@ -300,11 +300,11 @@ resource "aws_lambda_function" "safemate_directory_creator" {
 
 # Group Manager Lambda Function
 resource "aws_lambda_function" "group_manager" {
-  filename         = "../services/group-manager/group-manager.zip"
+  filename         = "services/group-manager/group-manager.zip"
   function_name    = "${local.name_prefix}-group-manager"
   role            = aws_iam_role.group_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("../services/group-manager/group-manager.zip")
+  source_code_hash = filebase64sha256("services/group-manager/group-manager.zip")
   runtime         = "nodejs18.x"
   timeout         = 30
   memory_size     = 256
@@ -3229,11 +3229,11 @@ resource "aws_api_gateway_integration_response" "invitations_respond_options_int
 
 # Post-Confirmation Wallet Creator Lambda Function
 resource "aws_lambda_function" "post_confirmation_wallet_creator" {
-  filename         = "../services/post-confirmation-wallet-creator/post-confirmation-wallet-creator.zip"
+  filename         = "services/post-confirmation-wallet-creator/post-confirmation-wallet-creator.zip"
   function_name    = "${local.name_prefix}-post-confirmation-wallet-creator"
   role            = aws_iam_role.post_confirmation_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("../services/post-confirmation-wallet-creator/post-confirmation-wallet-creator.zip")
+  source_code_hash = filebase64sha256("services/post-confirmation-wallet-creator/post-confirmation-wallet-creator.zip")
   runtime         = "nodejs18.x"
   timeout         = 30
   memory_size     = 256
