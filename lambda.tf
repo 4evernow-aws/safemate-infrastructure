@@ -341,7 +341,7 @@ resource "aws_lambda_function" "group_manager" {
 # CloudWatch Log Group for Group Manager Lambda
 resource "aws_cloudwatch_log_group" "group_lambda_logs" {
   name              = "/aws/lambda/${local.name_prefix}-group-manager"
-  retention_in_days = 14
+  retention_in_days = local.environment == "dev" ? 7 : 14
 
   tags = {
     Environment = var.environment
@@ -353,7 +353,7 @@ resource "aws_cloudwatch_log_group" "group_lambda_logs" {
 # CloudWatch Log Group for Token Vault Lambda
 resource "aws_cloudwatch_log_group" "vault_lambda_logs" {
   name              = "/aws/lambda/${local.name_prefix}-token-vault"
-  retention_in_days = 7
+  retention_in_days = local.environment == "dev" ? 7 : 14
 
   tags = {
     Environment = var.environment
@@ -365,7 +365,7 @@ resource "aws_cloudwatch_log_group" "vault_lambda_logs" {
 # CloudWatch Log Group for Hedera Service Lambda
 resource "aws_cloudwatch_log_group" "hedera_lambda_logs" {
   name              = "/aws/lambda/${local.name_prefix}-hedera-service"
-  retention_in_days = 30  # Longer retention for comprehensive blockchain operations
+  retention_in_days = local.environment == "dev" ? 7 : 14  # Reduced retention for cost optimization
 
   tags = {
     Environment = var.environment
@@ -377,7 +377,7 @@ resource "aws_cloudwatch_log_group" "hedera_lambda_logs" {
 # CloudWatch Log Group for Wallet Manager Lambda
 resource "aws_cloudwatch_log_group" "wallet_lambda_logs" {
   name              = "/aws/lambda/${local.name_prefix}-wallet-manager"
-  retention_in_days = 14  # Longer retention for wallet operations
+  retention_in_days = local.environment == "dev" ? 7 : 14  # Environment-specific retention
 
   tags = {
     Environment = var.environment
@@ -389,7 +389,7 @@ resource "aws_cloudwatch_log_group" "wallet_lambda_logs" {
 # CloudWatch Log Group for User Onboarding Lambda
 resource "aws_cloudwatch_log_group" "user_onboarding_lambda_logs" {
   name              = "/aws/lambda/${local.name_prefix}-user-onboarding"
-  retention_in_days = 14  # Longer retention for user onboarding
+  retention_in_days = local.environment == "dev" ? 7 : 14  # Environment-specific retention
 
   tags = {
     Environment = var.environment
@@ -401,7 +401,7 @@ resource "aws_cloudwatch_log_group" "user_onboarding_lambda_logs" {
 # CloudWatch Log Group for Directory Creator Lambda
 resource "aws_cloudwatch_log_group" "directory_creator_lambda_logs" {
   name              = "/aws/lambda/${local.name_prefix}-directory-creator"
-  retention_in_days = 14
+  retention_in_days = local.environment == "dev" ? 7 : 14  # Environment-specific retention
 
   tags = {
     Environment = var.environment
@@ -3382,7 +3382,7 @@ resource "aws_iam_policy" "post_confirmation_permissions" {
 # Post-Confirmation Lambda CloudWatch log group
 resource "aws_cloudwatch_log_group" "post_confirmation_lambda_logs" {
   name              = "/aws/lambda/${local.name_prefix}-post-confirmation-wallet-creator"
-  retention_in_days = 14
+  retention_in_days = local.environment == "dev" ? 7 : 14  # Environment-specific retention
 
   tags = {
     Environment = var.environment
