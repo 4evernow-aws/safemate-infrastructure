@@ -1,12 +1,20 @@
 # SafeMate Preprod Environment Status
 
-**Date**: September 21, 2025  
+**Date**: September 22, 2025  
 **Environment**: preprod  
-**Last Updated**: After fixing MyFiles dialog and folder display issues  
+**Last Updated**: After fixing CORS issues for folder/file NFT operations  
 
 ## 🎯 Current Status: OPERATIONAL
 
-### ✅ Recently Fixed Issues (September 21, 2025)
+### ✅ Recently Fixed Issues (September 22, 2025)
+
+1. **CORS Configuration Issue** - RESOLVED
+   - Fixed CORS preflight requests for CloudFront URL: `https://d2xl0r3mv20sy5.cloudfront.net`
+   - Updated Hedera API Gateway deployment with proper CORS headers
+   - Redeployed Lambda function with correct CORS configuration
+   - Folder and file NFT operations now working correctly
+
+### ✅ Previously Fixed Issues (September 21, 2025)
 
 1. **MyFiles Dialog Overlay Issue** - RESOLVED
    - Fixed multiple message overlays in create folder dialog
@@ -28,6 +36,9 @@
   - `preprod-safemate-hedera-service` - ✅ Updated with folder display fix
   - `preprod-safemate-user-onboarding` - ✅ Operational
 - **API Gateway**: ✅ CORS configured for preprod origins
+  - Hedera API: `uvk4xxwjyg.execute-api.ap-southeast-2.amazonaws.com/preprod`
+  - CORS headers include CloudFront URL: `https://d2xl0r3mv20sy5.cloudfront.net`
+  - OPTIONS methods configured for all endpoints
 - **DynamoDB Tables**: ✅ All operational
   - `preprod-safemate-hedera-folders`
   - `preprod-safemate-files` 
@@ -35,7 +46,9 @@
   - `preprod-safemate-wallet-keys`
 - **S3 Static Hosting**: ✅ Deployed with correct MIME types
   - Bucket: `preprod-safemate-static-hosting`
-  - URL: `https://preprod-safemate-static-hosting.s3-website-ap-southeast-2.amazonaws.com`
+  - S3 URL: `http://preprod-safemate-static-hosting.s3-website-ap-southeast-2.amazonaws.com`
+- **CloudFront CDN**: ✅ Global content delivery
+  - CloudFront URL: `https://d2xl0r3mv20sy5.cloudfront.net` (Primary access URL)
 
 ### Hedera Integration
 - **Network**: Hedera Testnet ✅
@@ -109,9 +122,10 @@
 ## 🔑 Important Configuration
 
 ### API Endpoints
-- **Hedera Service**: `https://2kwe2ly8vh.execute-api.ap-southeast-2.amazonaws.com/preprod`
+- **Hedera Service**: `https://uvk4xxwjyg.execute-api.ap-southeast-2.amazonaws.com/preprod`
 - **User Onboarding**: `https://ol212feqdl.execute-api.ap-southeast-2.amazonaws.com/preprod`
-- **Frontend**: `https://preprod-safemate-static-hosting.s3-website-ap-southeast-2.amazonaws.com`
+- **Frontend (CloudFront)**: `https://d2xl0r3mv20sy5.cloudfront.net` (Primary)
+- **Frontend (S3)**: `http://preprod-safemate-static-hosting.s3-website-ap-southeast-2.amazonaws.com`
 
 ### Environment Variables
 - **HEDERA_NETWORK**: testnet
@@ -126,6 +140,25 @@
 - ✅ Frontend: Fixed transaction endpoint in `hederaApiService.ts`
 - ✅ Deployed to AWS Lambda and S3
 - ✅ All MIME types configured correctly
+
+### September 21, 2025 (Evening)
+- ✅ Frontend: Fixed dropdown text overlap issue in Create New Folder dialog
+- ✅ Frontend: Added Created Items window to upload page sidebar
+- ✅ Frontend: Enhanced z-index layering for Dialog, Backdrop, and Select components
+- ✅ Frontend: Added interactive folder selection with visual feedback
+- ✅ Frontend: Deployed to AWS S3 preprod environment
+- ✅ Infrastructure: Updated CloudWatch log retention policies (7 days dev, 14 days preprod)
+- ✅ Infrastructure: Fixed Terraform validation errors for CI/CD pipeline
+
+### September 21, 2025 (Late Evening)
+- ✅ Frontend: Fixed folder display issue - folders now show up after creation
+- ✅ Frontend: Added support for both API response structures (direct and nested)
+- ✅ Frontend: Enhanced folder listing logic to handle backend response format
+- ✅ Frontend: Deployed updated folder display fix to AWS S3 preprod
+- ✅ Backend: Identified and fixed API response double-wrapping issue
+- ✅ Backend: Successfully deployed Lambda function fix via AWS CLI (bypassed Terraform size limits)
+- ✅ Issue Resolution: Created folders now properly display in MyFiles and Upload pages
+- ✅ Deployment: Backend API now returns correct response structure for folder listing
 
 ## 🎯 Development Commands
 
