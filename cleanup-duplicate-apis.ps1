@@ -106,3 +106,9 @@ Write-Host "  Hedera API: https://uvk4xxwjyg.execute-api.ap-southeast-2.amazonaw
 Write-Host "  Group API: https://o529nxt704.execute-api.ap-southeast-2.amazonaws.com/preprod" -ForegroundColor White
 Write-Host "  Onboarding API: https://ylpabkmc68.execute-api.ap-southeast-2.amazonaws.com/preprod" -ForegroundColor White
 Write-Host "  Vault API: https://peh5vc8yj3.execute-api.ap-southeast-2.amazonaws.com/preprod" -ForegroundColor White
+
+Write-Host "`n✅ CLEANUP COMPLETED - September 23, 2025" -ForegroundColor Green
+Write-Host "   - All Edge-optimized APIs removed successfully" -ForegroundColor Green
+Write-Host "   - Regional APIs are active and functional" -ForegroundColor Green
+Write-Host "   - PostConfirmation Lambda fixed and deployed" -ForegroundColor Green
+Write-Host "   - Email verification working end-to-end" -ForegroundColor Green

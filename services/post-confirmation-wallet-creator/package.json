@@ -1,4 +1,5 @@
 {
+  "_comment": "SafeMate PostConfirmation Lambda Dependencies - Preprod Environment - Updated: September 23, 2025",
   "name": "post-confirmation-wallet-creator",
   "version": "1.0.0",
   "description": "SafeMate PostConfirmation Lambda for wallet creation",

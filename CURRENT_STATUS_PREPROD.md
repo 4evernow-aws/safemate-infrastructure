@@ -14,9 +14,11 @@
    - **Result**: Email verification codes are now being sent successfully
 
 2. **PostConfirmation Lambda Error** - RESOLVED ✅
-   - **Root Cause**: Missing 'long' module dependency in Hedera SDK layer
-   - **Solution**: Added 'long' module to PostConfirmation Lambda package.json and redeployed
-   - **Result**: PostConfirmation Lambda now works without module errors
+   - **Root Cause**: Missing 'long' module dependency in Hedera SDK layer (`hedera-sdk-layer:1`)
+   - **Solution**: Removed problematic layer and added complete Hedera SDK dependencies directly to Lambda package
+   - **Dependencies Added**: `@hashgraph/sdk: ^2.73.1` and `long: ^5.2.3`
+   - **Deployment**: 58MB package deployed via S3 to avoid size limits
+   - **Result**: PostConfirmation Lambda now successfully creates Hedera wallets without module errors
 
 ### ✅ Previously Fixed Issues (September 22, 2025)
 
