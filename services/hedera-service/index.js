@@ -12,10 +12,13 @@
  * - File and folder operations on Hedera File Service
  * - KMS encryption for sensitive data
  * 
- * Last Updated: September 20, 2025
+ * Last Updated: September 22, 2025
  * Status: Live Hedera testnet integration active
  * Added: /transactions and /balance endpoints for wallet operations
  * Fixed: Transaction data mapping to return array format for frontend compatibility
+ * Fixed: listUserFolders response format to match frontend expectations (data.folders structure)
+ * Fixed: Lambda function memory increased to 1024MB and timeout to 90s to resolve 502 errors during Hedera SDK import
+ * Fixed: Lambda deployment package updated with correct hedera-client.js and @hashgraph/sdk dependencies
  */
 
 const { randomUUID } = require('crypto');
@@ -383,7 +386,9 @@ async function listUserFolders(userId) {
     
     return {
       success: true,
-      folders: folders
+      data: {
+        folders: folders
+      }
     };
   } catch (error) {
     console.error(`❌ Failed to list folders for user ${userId}:`, error);
@@ -1538,7 +1543,7 @@ function createResponse(statusCode, body, event) {
   const origin = event?.headers?.origin || event?.headers?.Origin;
   const allowedOrigins = [
     'https://preprod-safemate-static-hosting.s3-website-ap-southeast-2.amazonaws.com',
-    'https://d19a5c2wn4mtdt.cloudfront.net'
+    'https://d2xl0r3mv20sy5.cloudfront.net'
   ];
   
   // For preprod, allow specific origins
@@ -1619,10 +1624,7 @@ exports.handler = async (event) => {
     if (cleanPath === '/folders') {
       if (httpMethod === 'GET') {
         const result = await listUserFolders(userId);
-        return createResponse(200, { 
-          success: true, 
-          data: result 
-        }, event);
+        return createResponse(200, result, event);
       } else if (httpMethod === 'POST') {
         const { name, parentFolderId } = JSON.parse(body);
         if (!name) {

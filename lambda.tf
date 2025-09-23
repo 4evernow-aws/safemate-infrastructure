@@ -2,7 +2,7 @@
 resource "aws_lambda_layer_version" "hedera_dependencies_layer" {
   filename         = "lambda-layer/hedera-layer.zip"
   layer_name       = "${local.name_prefix}-hedera-dependencies"
-  description      = "Layer containing Hedera SDK and AWS SDK dependencies - Minimal essential dependencies"
+  description      = "Layer containing Hedera SDK and AWS SDK dependencies - Minimal essential dependencies - Updated 20250922"
   source_code_hash = filebase64sha256("lambda-layer/hedera-layer.zip")
 
   compatible_runtimes = ["nodejs18.x"]
@@ -53,18 +53,22 @@ resource "aws_lambda_function" "token_vault" {
 # Hedera Service Lambda Function (Comprehensive blockchain operations)
 # Hedera Service Lambda Function (Comprehensive blockchain operations)
 resource "aws_lambda_function" "hedera_service" {
-  filename         = "services/hedera-service/hedera-service.zip"
+  filename         = "services/hedera-service/hedera-service-fixed.zip"
   function_name    = "${local.name_prefix}-hedera-service"
   role            = aws_iam_role.hedera_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("services/hedera-service/hedera-service.zip")
+  source_code_hash = filebase64sha256("services/hedera-service/hedera-service-fixed.zip")
   runtime         = "nodejs18.x"
   timeout         = 90  # Longer timeout for complex blockchain operations
+  memory_size     = 1024  # Increased memory for Hedera SDK operations
   
-  # Temporarily removed layers due to size constraints
-  # layers = [
-  #   aws_lambda_layer_version.safemate_dependencies_layer.arn
-  # ]
+  # Lambda layer containing Hedera SDK and dependencies
+  layers = [
+    aws_lambda_layer_version.hedera_dependencies_layer.arn
+  ]
+  
+  # Force new deployment
+  description = "Hedera Service Lambda - Updated 20250922 to fix 502 errors"
 
   environment {
     variables = {
@@ -79,7 +83,7 @@ resource "aws_lambda_function" "hedera_service" {
       BLOCKCHAIN_AUDIT_TABLE     = aws_dynamodb_table.wallet_audit.name
       WALLET_KMS_KEY_ID          = aws_kms_key.safemate_master_key.key_id
       APP_SECRETS_KMS_KEY_ID     = aws_kms_key.safemate_master_key.key_id
-      COGNITO_USER_POOL_ID       = aws_cognito_user_pool.app_pool_v2.id
+      COGNITO_USER_POOL_ID       = aws_cognito_user_pool.app_pool_v3.id
       HEDERA_NETWORK             = "testnet"
     }
   }
@@ -120,7 +124,7 @@ resource "aws_lambda_function" "wallet_manager" {
       USER_SECRETS_TABLE    = aws_dynamodb_table.user_secrets.name
       WALLET_KMS_KEY_ID     = aws_kms_key.safemate_master_key.key_id
       APP_SECRETS_KMS_KEY_ID = aws_kms_key.safemate_master_key.key_id
-      COGNITO_USER_POOL_ID  = aws_cognito_user_pool.app_pool_v2.id
+      COGNITO_USER_POOL_ID  = aws_cognito_user_pool.app_pool_v3.id
       HEDERA_NETWORK        = "testnet"
     }
   }
@@ -150,7 +154,7 @@ resource "aws_lambda_function" "user_onboarding" {
   memory_size     = 512
   
   # Use Lambda layer for Hedera SDK dependencies
-  layers = [aws_lambda_layer_version.hedera_dependencies_layer.arn]
+  layers = ["arn:aws:lambda:ap-southeast-2:994220462693:layer:hedera-sdk-layer:1"]
 
   environment {
     variables = {
@@ -159,7 +163,7 @@ resource "aws_lambda_function" "user_onboarding" {
       WALLET_METADATA_TABLE    = aws_dynamodb_table.wallet_metadata.name
       WALLET_KMS_KEY_ID        = aws_kms_key.safemate_master_key.arn
       APP_SECRETS_KMS_KEY_ID   = aws_kms_key.safemate_master_key.arn
-      COGNITO_USER_POOL_ID     = aws_cognito_user_pool.app_pool_v2.id
+      COGNITO_USER_POOL_ID     = aws_cognito_user_pool.app_pool_v3.id
       REGION                   = data.aws_region.current.name
     }
   }
@@ -320,7 +324,7 @@ resource "aws_lambda_function" "group_manager" {
       GROUP_INVITATIONS_TABLE = aws_dynamodb_table.group_invitations.name
       USER_PROFILES_TABLE    = aws_dynamodb_table.user_profiles.name
       USER_NOTIFICATIONS_TABLE = aws_dynamodb_table.user_notifications.name
-      COGNITO_USER_POOL_ID   = aws_cognito_user_pool.app_pool_v2.id
+      COGNITO_USER_POOL_ID   = aws_cognito_user_pool.app_pool_v3.id
       REGION                 = data.aws_region.current.name
     }
   }
@@ -805,28 +809,28 @@ resource "aws_api_gateway_authorizer" "vault_cognito_authorizer" {
   name          = "${local.name_prefix}-vault-cognito-authorizer"
   rest_api_id   = aws_api_gateway_rest_api.vault_api.id
   type          = "COGNITO_USER_POOLS"
-  provider_arns = [aws_cognito_user_pool.app_pool_v2.arn]
+  provider_arns = [aws_cognito_user_pool.app_pool_v3.arn]
 }
 
 resource "aws_api_gateway_authorizer" "wallet_cognito_authorizer" {
   name          = "${local.name_prefix}-wallet-cognito-authorizer"
   rest_api_id   = aws_api_gateway_rest_api.wallet_api.id
   type          = "COGNITO_USER_POOLS"
-  provider_arns = [aws_cognito_user_pool.app_pool_v2.arn]
+  provider_arns = [aws_cognito_user_pool.app_pool_v3.arn]
 }
 
 resource "aws_api_gateway_authorizer" "onboarding_cognito_authorizer" {
   name          = "${local.name_prefix}-onboarding-cognito-authorizer"
   rest_api_id   = aws_api_gateway_rest_api.onboarding_api.id
   type          = "COGNITO_USER_POOLS"
-  provider_arns = [aws_cognito_user_pool.app_pool_v2.arn]
+  provider_arns = [aws_cognito_user_pool.app_pool_v3.arn]
 }
 
 resource "aws_api_gateway_authorizer" "hedera_cognito_authorizer" {
   name          = "${local.name_prefix}-hedera-cognito-authorizer"
   rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
   type          = "COGNITO_USER_POOLS"
-  provider_arns = [aws_cognito_user_pool.app_pool_v2.arn]
+  provider_arns = [aws_cognito_user_pool.app_pool_v3.arn]
 }
 
 # Groups API Gateway
@@ -864,7 +868,7 @@ resource "aws_api_gateway_authorizer" "group_cognito_authorizer" {
   name          = "${local.name_prefix}-group-cognito-authorizer"
   rest_api_id   = aws_api_gateway_rest_api.group_api.id
   type          = "COGNITO_USER_POOLS"
-  provider_arns = [aws_cognito_user_pool.app_pool_v2.arn]
+  provider_arns = [aws_cognito_user_pool.app_pool_v3.arn]
 }
 
 # API Gateway resource for /groups
@@ -2018,6 +2022,18 @@ resource "aws_api_gateway_deployment" "hedera_deployment" {
   stage_name  = var.environment
 
   depends_on = [
+    # New endpoints
+    aws_api_gateway_method.balance_get,
+    aws_api_gateway_method.balance_options,
+    aws_api_gateway_method.transactions_get,
+    aws_api_gateway_method.transactions_options,
+    aws_api_gateway_method.nft_get,
+    aws_api_gateway_method.nft_options,
+    aws_api_gateway_method.nft_create_post,
+    aws_api_gateway_method.nft_create_options,
+    aws_api_gateway_method.nft_list_get,
+    aws_api_gateway_method.nft_list_options,
+    # Existing endpoints
     aws_api_gateway_method.files_get,
     aws_api_gateway_method.files_upload_post,
     aws_api_gateway_method.files_content_get,
@@ -2031,6 +2047,18 @@ resource "aws_api_gateway_deployment" "hedera_deployment" {
     aws_api_gateway_method.folders_delete,
     aws_api_gateway_method.folders_options,
     aws_api_gateway_method.folders_folder_id_options,
+    # New integrations
+    aws_api_gateway_integration.balance_get_integration,
+    aws_api_gateway_integration.balance_options_integration,
+    aws_api_gateway_integration.transactions_get_integration,
+    aws_api_gateway_integration.transactions_options_integration,
+    aws_api_gateway_integration.nft_get_integration,
+    aws_api_gateway_integration.nft_options_integration,
+    aws_api_gateway_integration.nft_create_post_integration,
+    aws_api_gateway_integration.nft_create_options_integration,
+    aws_api_gateway_integration.nft_list_get_integration,
+    aws_api_gateway_integration.nft_list_options_integration,
+    # Existing integrations
     aws_api_gateway_integration.files_get_integration,
     aws_api_gateway_integration.files_upload_integration,
     aws_api_gateway_integration.files_content_integration,
@@ -2044,6 +2072,18 @@ resource "aws_api_gateway_deployment" "hedera_deployment" {
     aws_api_gateway_integration.folders_delete_integration,
     aws_api_gateway_integration.folders_options_integration,
     aws_api_gateway_integration.folders_folder_id_options_integration,
+    # New method responses
+    aws_api_gateway_method_response.balance_get_response,
+    aws_api_gateway_method_response.balance_options_response,
+    aws_api_gateway_method_response.transactions_get_response,
+    aws_api_gateway_method_response.transactions_options_response,
+    aws_api_gateway_method_response.nft_get_response,
+    aws_api_gateway_method_response.nft_options_response,
+    aws_api_gateway_method_response.nft_create_post_response,
+    aws_api_gateway_method_response.nft_create_options_response,
+    aws_api_gateway_method_response.nft_list_get_response,
+    aws_api_gateway_method_response.nft_list_options_response,
+    # Existing method responses
     aws_api_gateway_method_response.files_get_response,
     aws_api_gateway_method_response.files_upload_response,
     aws_api_gateway_method_response.files_content_response,
@@ -2057,6 +2097,18 @@ resource "aws_api_gateway_deployment" "hedera_deployment" {
     aws_api_gateway_method_response.folders_delete_response,
     aws_api_gateway_method_response.folders_options_response,
     aws_api_gateway_method_response.folders_folder_id_options_response,
+    # New integration responses
+    aws_api_gateway_integration_response.balance_get_integration_response,
+    aws_api_gateway_integration_response.balance_options_integration_response,
+    aws_api_gateway_integration_response.transactions_get_integration_response,
+    aws_api_gateway_integration_response.transactions_options_integration_response,
+    aws_api_gateway_integration_response.nft_get_integration_response,
+    aws_api_gateway_integration_response.nft_options_integration_response,
+    aws_api_gateway_integration_response.nft_create_post_integration_response,
+    aws_api_gateway_integration_response.nft_create_options_integration_response,
+    aws_api_gateway_integration_response.nft_list_get_integration_response,
+    aws_api_gateway_integration_response.nft_list_options_integration_response,
+    # Existing integration responses
     aws_api_gateway_integration_response.files_get_integration_response,
     aws_api_gateway_integration_response.files_upload_integration_response,
     aws_api_gateway_integration_response.files_content_integration_response,
@@ -2113,7 +2165,8 @@ resource "aws_api_gateway_deployment" "hedera_deployment" {
       aws_api_gateway_integration_response.folders_delete_integration_response.id,
       aws_api_gateway_integration_response.folders_options_integration_response.id,
       aws_api_gateway_integration_response.folders_folder_id_options_integration_response.id,
-      "cors-fix-v6-with-actual-methods-20250707",
+      aws_lambda_function.hedera_service.id,
+      "lambda-502-fix-force-deploy-20250922-v2",
     ]))
   }
 
@@ -2159,7 +2212,7 @@ resource "aws_lambda_permission" "user_onboarding_cognito" {
   function_name = aws_lambda_function.user_onboarding.function_name
   principal     = "cognito-idp.amazonaws.com"
 
-  source_arn = aws_cognito_user_pool.app_pool_v2.arn
+  source_arn = aws_cognito_user_pool.app_pool_v3.arn
 }
 
 # Lambda permission for Onboarding API Gateway
@@ -2283,6 +2336,121 @@ resource "aws_api_gateway_gateway_response" "onboarding_default_5xx" {
   }
 }
 
+# BALANCE API RESOURCE
+resource "aws_api_gateway_resource" "balance_resource" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  parent_id   = aws_api_gateway_rest_api.hedera_api.root_resource_id
+  path_part   = "balance"
+}
+
+# TRANSACTIONS API RESOURCE
+resource "aws_api_gateway_resource" "transactions_resource" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  parent_id   = aws_api_gateway_rest_api.hedera_api.root_resource_id
+  path_part   = "transactions"
+}
+
+# NFT API RESOURCE
+resource "aws_api_gateway_resource" "nft_resource" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  parent_id   = aws_api_gateway_rest_api.hedera_api.root_resource_id
+  path_part   = "nft"
+}
+
+# NFT CREATE API RESOURCE
+resource "aws_api_gateway_resource" "nft_create_resource" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  parent_id   = aws_api_gateway_resource.nft_resource.id
+  path_part   = "create"
+}
+
+# NFT LIST API RESOURCE
+resource "aws_api_gateway_resource" "nft_list_resource" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  parent_id   = aws_api_gateway_resource.nft_resource.id
+  path_part   = "list"
+}
+
+# BALANCE API METHODS
+resource "aws_api_gateway_method" "balance_get" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.balance_resource.id
+  http_method   = "GET"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.hedera_cognito_authorizer.id
+}
+
+resource "aws_api_gateway_method" "balance_options" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.balance_resource.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+# TRANSACTIONS API METHODS
+resource "aws_api_gateway_method" "transactions_get" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.transactions_resource.id
+  http_method   = "GET"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.hedera_cognito_authorizer.id
+}
+
+resource "aws_api_gateway_method" "transactions_options" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.transactions_resource.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+# NFT API METHODS
+resource "aws_api_gateway_method" "nft_get" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.nft_resource.id
+  http_method   = "GET"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.hedera_cognito_authorizer.id
+}
+
+resource "aws_api_gateway_method" "nft_options" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.nft_resource.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+# NFT CREATE API METHODS
+resource "aws_api_gateway_method" "nft_create_post" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.nft_create_resource.id
+  http_method   = "POST"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.hedera_cognito_authorizer.id
+}
+
+resource "aws_api_gateway_method" "nft_create_options" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.nft_create_resource.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+# NFT LIST API METHODS
+resource "aws_api_gateway_method" "nft_list_get" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.nft_list_resource.id
+  http_method   = "GET"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.hedera_cognito_authorizer.id
+}
+
+resource "aws_api_gateway_method" "nft_list_options" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  resource_id   = aws_api_gateway_resource.nft_list_resource.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
 # FILES API METHODS
 resource "aws_api_gateway_method" "files_get" {
   rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
@@ -2387,6 +2555,121 @@ resource "aws_api_gateway_method" "folders_folder_id_options" {
   resource_id   = aws_api_gateway_resource.folders_folder_id.id
   http_method   = "OPTIONS"
   authorization = "NONE"
+}
+
+# BALANCE API INTEGRATIONS
+resource "aws_api_gateway_integration" "balance_get_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.balance_resource.id
+  http_method = aws_api_gateway_method.balance_get.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.hedera_service.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "balance_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.balance_resource.id
+  http_method = aws_api_gateway_method.balance_options.http_method
+
+  type = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+# TRANSACTIONS API INTEGRATIONS
+resource "aws_api_gateway_integration" "transactions_get_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.transactions_resource.id
+  http_method = aws_api_gateway_method.transactions_get.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.hedera_service.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "transactions_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.transactions_resource.id
+  http_method = aws_api_gateway_method.transactions_options.http_method
+
+  type = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+# NFT API INTEGRATIONS
+resource "aws_api_gateway_integration" "nft_get_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_resource.id
+  http_method = aws_api_gateway_method.nft_get.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.hedera_service.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "nft_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_resource.id
+  http_method = aws_api_gateway_method.nft_options.http_method
+
+  type = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+# NFT CREATE API INTEGRATIONS
+resource "aws_api_gateway_integration" "nft_create_post_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_create_resource.id
+  http_method = aws_api_gateway_method.nft_create_post.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.hedera_service.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "nft_create_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_create_resource.id
+  http_method = aws_api_gateway_method.nft_create_options.http_method
+
+  type = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+# NFT LIST API INTEGRATIONS
+resource "aws_api_gateway_integration" "nft_list_get_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_list_resource.id
+  http_method = aws_api_gateway_method.nft_list_get.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.hedera_service.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "nft_list_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_list_resource.id
+  http_method = aws_api_gateway_method.nft_list_options.http_method
+
+  type = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
 }
 
 # FILES API INTEGRATIONS
@@ -2527,6 +2810,131 @@ resource "aws_api_gateway_integration" "folders_folder_id_options_integration" {
   }
 }
 
+# BALANCE API METHOD RESPONSES
+resource "aws_api_gateway_method_response" "balance_get_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.balance_resource.id
+  http_method = aws_api_gateway_method.balance_get.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "balance_options_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.balance_resource.id
+  http_method = aws_api_gateway_method.balance_options.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+# TRANSACTIONS API METHOD RESPONSES
+resource "aws_api_gateway_method_response" "transactions_get_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.transactions_resource.id
+  http_method = aws_api_gateway_method.transactions_get.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "transactions_options_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.transactions_resource.id
+  http_method = aws_api_gateway_method.transactions_options.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+# NFT API METHOD RESPONSES
+resource "aws_api_gateway_method_response" "nft_get_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_resource.id
+  http_method = aws_api_gateway_method.nft_get.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "nft_options_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_resource.id
+  http_method = aws_api_gateway_method.nft_options.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+# NFT CREATE API METHOD RESPONSES
+resource "aws_api_gateway_method_response" "nft_create_post_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_create_resource.id
+  http_method = aws_api_gateway_method.nft_create_post.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "nft_create_options_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_create_resource.id
+  http_method = aws_api_gateway_method.nft_create_options.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+# NFT LIST API METHOD RESPONSES
+resource "aws_api_gateway_method_response" "nft_list_get_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_list_resource.id
+  http_method = aws_api_gateway_method.nft_list_get.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "nft_list_options_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_list_resource.id
+  http_method = aws_api_gateway_method.nft_list_options.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
 # FILES API METHOD RESPONSES
 resource "aws_api_gateway_method_response" "files_get_response" {
   rest_api_id = aws_api_gateway_rest_api.hedera_api.id
@@ -2622,6 +3030,161 @@ resource "aws_api_gateway_method_response" "files_file_id_options_response" {
     "method.response.header.Access-Control-Allow-Headers" = true
     "method.response.header.Access-Control-Allow-Methods" = true
   }
+}
+
+# BALANCE CORS INTEGRATION RESPONSES
+# Integration response for balance GET method
+resource "aws_api_gateway_integration_response" "balance_get_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.balance_resource.id
+  http_method = aws_api_gateway_method.balance_get.http_method
+  status_code = aws_api_gateway_method_response.balance_get_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.balance_get_integration]
+}
+
+# Integration response for balance OPTIONS method
+resource "aws_api_gateway_integration_response" "balance_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.balance_resource.id
+  http_method = aws_api_gateway_method.balance_options.http_method
+  status_code = aws_api_gateway_method_response.balance_options_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.balance_options_integration]
+}
+
+# TRANSACTIONS CORS INTEGRATION RESPONSES
+# Integration response for transactions GET method
+resource "aws_api_gateway_integration_response" "transactions_get_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.transactions_resource.id
+  http_method = aws_api_gateway_method.transactions_get.http_method
+  status_code = aws_api_gateway_method_response.transactions_get_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.transactions_get_integration]
+}
+
+# Integration response for transactions OPTIONS method
+resource "aws_api_gateway_integration_response" "transactions_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.transactions_resource.id
+  http_method = aws_api_gateway_method.transactions_options.http_method
+  status_code = aws_api_gateway_method_response.transactions_options_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.transactions_options_integration]
+}
+
+# NFT CORS INTEGRATION RESPONSES
+# Integration response for nft GET method
+resource "aws_api_gateway_integration_response" "nft_get_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_resource.id
+  http_method = aws_api_gateway_method.nft_get.http_method
+  status_code = aws_api_gateway_method_response.nft_get_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.nft_get_integration]
+}
+
+# Integration response for nft OPTIONS method
+resource "aws_api_gateway_integration_response" "nft_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_resource.id
+  http_method = aws_api_gateway_method.nft_options.http_method
+  status_code = aws_api_gateway_method_response.nft_options_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.nft_options_integration]
+}
+
+# NFT CREATE CORS INTEGRATION RESPONSES
+# Integration response for nft create POST method
+resource "aws_api_gateway_integration_response" "nft_create_post_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_create_resource.id
+  http_method = aws_api_gateway_method.nft_create_post.http_method
+  status_code = aws_api_gateway_method_response.nft_create_post_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.nft_create_post_integration]
+}
+
+# Integration response for nft create OPTIONS method
+resource "aws_api_gateway_integration_response" "nft_create_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_create_resource.id
+  http_method = aws_api_gateway_method.nft_create_options.http_method
+  status_code = aws_api_gateway_method_response.nft_create_options_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.nft_create_options_integration]
+}
+
+# NFT LIST CORS INTEGRATION RESPONSES
+# Integration response for nft list GET method
+resource "aws_api_gateway_integration_response" "nft_list_get_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_list_resource.id
+  http_method = aws_api_gateway_method.nft_list_get.http_method
+  status_code = aws_api_gateway_method_response.nft_list_get_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.nft_list_get_integration]
+}
+
+# Integration response for nft list OPTIONS method
+resource "aws_api_gateway_integration_response" "nft_list_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.hedera_api.id
+  resource_id = aws_api_gateway_resource.nft_list_resource.id
+  http_method = aws_api_gateway_method.nft_list_options.http_method
+  status_code = aws_api_gateway_method_response.nft_list_options_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+  }
+
+  depends_on = [aws_api_gateway_integration.nft_list_options_integration]
 }
 
 # FILES CORS INTEGRATION RESPONSES
@@ -2799,7 +3362,6 @@ resource "aws_api_gateway_integration_response" "folders_get_integration_respons
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 }
 
@@ -2812,7 +3374,6 @@ resource "aws_api_gateway_integration_response" "folders_post_integration_respon
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 }
 
@@ -2825,7 +3386,6 @@ resource "aws_api_gateway_integration_response" "folders_delete_integration_resp
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 }
 
@@ -3001,7 +3561,7 @@ resource "aws_api_gateway_stage" "hedera_stage" {
 resource "aws_api_gateway_stage" "onboarding_stage" {
   deployment_id = aws_api_gateway_deployment.onboarding_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.onboarding_api.id
-  stage_name    = var.environment
+  stage_name    = local.environment
   
   depends_on = [aws_api_gateway_deployment.onboarding_deployment]
 }
@@ -3237,13 +3797,22 @@ resource "aws_lambda_function" "post_confirmation_wallet_creator" {
   runtime         = "nodejs18.x"
   timeout         = 30
   memory_size     = 256
+  
+  # Lambda layer containing Hedera SDK and dependencies
+  layers = [
+    "arn:aws:lambda:ap-southeast-2:994220462693:layer:hedera-sdk-layer:1"
+  ]
 
   environment {
     variables = {
       USER_ONBOARDING_FUNCTION = aws_lambda_function.user_onboarding.function_name
       REGION                   = data.aws_region.current.name
       KMS_KEY_ID               = aws_kms_key.safemate_master_key.key_id
-      SECRET_NAME              = aws_secretsmanager_secret.hedera_private_keys.name
+      USER_POOL_ID             = aws_cognito_user_pool.app_pool_v3.id
+      DYNAMODB_TABLE           = aws_dynamodb_table.user_secrets.name
+      WALLET_KEYS_TABLE        = aws_dynamodb_table.wallet_keys.name
+      APP_SECRETS_KMS_KEY_ID   = aws_kms_key.safemate_master_key.key_id
+      HEDERA_NETWORK           = "testnet"
     }
   }
 
@@ -3416,7 +3985,6 @@ resource "aws_api_gateway_integration_response" "onboarding_status_post_integrat
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 
   depends_on = [aws_api_gateway_integration.onboarding_status_integration]
@@ -3431,7 +3999,6 @@ resource "aws_api_gateway_integration_response" "onboarding_status_get_integrati
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 
   depends_on = [aws_api_gateway_integration.onboarding_status_get_integration]
@@ -3445,7 +4012,6 @@ resource "aws_api_gateway_integration_response" "onboarding_retry_post_integrati
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 
   depends_on = [aws_api_gateway_integration.onboarding_retry_integration]
@@ -3459,7 +4025,6 @@ resource "aws_api_gateway_integration_response" "onboarding_start_post_integrati
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin" = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 
   depends_on = [aws_api_gateway_integration.onboarding_start_integration]

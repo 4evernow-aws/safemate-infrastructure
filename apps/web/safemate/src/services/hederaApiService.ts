@@ -3,7 +3,7 @@ import type { HederaFolderInfo, HederaFileInfo, HederaTransaction, HederaAccount
 
 // Use the correct API Gateway URL for preprod environment
 export class HederaApiService {
-  private static readonly API_BASE_URL = 'https://2kwe2ly8vh.execute-api.ap-southeast-2.amazonaws.com/preprod';
+  private static readonly API_BASE_URL = 'https://uvk4xxwjyg.execute-api.ap-southeast-2.amazonaws.com/preprod';
 
   /**
    * Get account transactions

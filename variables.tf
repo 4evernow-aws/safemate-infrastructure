@@ -34,6 +34,12 @@ variable "app_url" {
   default     = ""
 }
 
+variable "cors_allowed_origins" {
+  description = "List of allowed origins for CORS configuration"
+  type        = list(string)
+  default     = []
+}
+
 variable "hedera_network" {
   description = "Hedera network to use (testnet or mainnet)"
   type        = string
@@ -49,6 +55,12 @@ variable "hedera_network" {
 locals {
   environment = var.environment != null ? var.environment : terraform.workspace
   name_prefix = "${local.environment}-${var.app_name}"
+  
+  # CORS allowed origins - combine default CloudFront with S3 website and any custom origins
+  cors_allowed_origins = concat([
+    "https://d2xl0r3mv20sy5.cloudfront.net",
+    "http://preprod-safemate-static-hosting.s3-website-ap-southeast-2.amazonaws.com"
+  ], var.cors_allowed_origins)
   
   # Environment-specific configurations
   environment_configs = {

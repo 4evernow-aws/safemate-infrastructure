@@ -329,7 +329,7 @@ export class SecureWalletService {
       console.log('🔍 SecureWalletService: Fetching balance for account:', accountAlias);
       
       // Use the Hedera API Gateway endpoint instead of mirror node
-      const hederaApiUrl = 'https://2kwe2ly8vh.execute-api.ap-southeast-2.amazonaws.com/preprod';
+      const hederaApiUrl = 'https://uvk4xxwjyg.execute-api.ap-southeast-2.amazonaws.com/preprod';
       const url = `${hederaApiUrl}/balance?accountId=${accountAlias}`;
       console.log('🔍 SecureWalletService: Balance URL:', url);
       

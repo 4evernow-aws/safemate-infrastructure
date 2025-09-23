@@ -148,7 +148,7 @@ resource "aws_iam_policy" "wallet_key_permissions" {
           "cognito-idp:AdminGetUser",
           "cognito-idp:AdminUpdateUserAttributes"
         ]
-        Resource = aws_cognito_user_pool.app_pool_v2.arn
+        Resource = aws_cognito_user_pool.app_pool_v3.arn
         Condition = {
           StringEquals = {
             "cognito-idp:username" = "$${aws:userid}"
@@ -552,7 +552,7 @@ resource "aws_iam_policy" "group_admin_permissions" {
           "cognito-idp:AdminListGroupsForUser",
           "cognito-idp:ListUsersInGroup"
         ]
-        Resource = aws_cognito_user_pool.app_pool_v2.arn
+        Resource = aws_cognito_user_pool.app_pool_v3.arn
       },
       {
         Sid    = "WalletReadAccess"
@@ -762,7 +762,7 @@ resource "aws_iam_policy" "group_lambda_permissions" {
           "cognito-idp:ListUsersInGroup",
           "cognito-idp:AdminGetUser"
         ]
-        Resource = aws_cognito_user_pool.app_pool_v2.arn
+        Resource = aws_cognito_user_pool.app_pool_v3.arn
       },
       {
         Sid    = "WalletMetadataAccess"

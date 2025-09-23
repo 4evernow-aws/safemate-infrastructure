@@ -55,8 +55,7 @@ This infrastructure deploys:
 - **DynamoDB**: NoSQL database for data storage
 - **S3**: Static website hosting and file storage
 - **CloudFront**: CDN for global content delivery
-- **KMS**: Encryption key management
-- **Secrets Manager**: Secure credential storage
+- **KMS**: Encryption key management for DynamoDB-stored credentials
 - **CloudWatch**: Logging and monitoring
 
 ## CI/CD Pipeline

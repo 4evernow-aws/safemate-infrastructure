@@ -1,5 +1,5 @@
-resource "aws_cognito_user_pool" "app_pool_v3" {
-  name = "${local.name_prefix}-user-pool-v3"
+resource "aws_cognito_user_pool" "app_pool_v2" {
+  name = "${local.name_prefix}-user-pool-v2"
 
   # Account recovery
   account_recovery_setting {
@@ -19,9 +19,8 @@ resource "aws_cognito_user_pool" "app_pool_v3" {
   }
 
   # User verification - Require email verification for all users
-  auto_verified_attributes = ["email"]
+  auto_verified_attributes = []
   username_attributes      = ["email"]
-
 
   # Email verification
   verification_message_template {
@@ -173,7 +172,7 @@ resource "aws_cognito_user_pool" "app_pool_v3" {
 
 resource "aws_cognito_user_pool_domain" "app_domain" {
   domain       = "${local.name_prefix}-auth-${random_string.domain_suffix.result}"
-  user_pool_id = aws_cognito_user_pool.app_pool_v3.id
+  user_pool_id = aws_cognito_user_pool.app_pool_v2.id
 }
 
 resource "random_string" "domain_suffix" {
@@ -184,7 +183,7 @@ resource "random_string" "domain_suffix" {
 
 resource "aws_cognito_user_pool_client" "app_client" {
   name         = "${local.name_prefix}-client"
-  user_pool_id = aws_cognito_user_pool.app_pool_v3.id
+  user_pool_id = aws_cognito_user_pool.app_pool_v2.id
 
   generate_secret = false
   
@@ -205,8 +204,6 @@ resource "aws_cognito_user_pool_client" "app_client" {
   # Support for reading custom attributes
   read_attributes = [
     "email",
-    "given_name",
-    "family_name",
     "custom:hedera_account",
     "custom:asset_count",
     "custom:subscription_tier",
@@ -219,8 +216,6 @@ resource "aws_cognito_user_pool_client" "app_client" {
 
   write_attributes = [
     "email",
-    "given_name",
-    "family_name",
     "custom:hedera_account",
     "custom:asset_count",
     "custom:subscription_tier",
@@ -263,7 +258,7 @@ resource "aws_cognito_identity_pool" "main" {
 
   cognito_identity_providers {
     client_id               = aws_cognito_user_pool_client.app_client.id
-    provider_name           = aws_cognito_user_pool.app_pool_v3.endpoint
+    provider_name           = aws_cognito_user_pool.app_pool_v2.endpoint
     server_side_token_check = false
   }
 
@@ -283,7 +278,7 @@ resource "aws_cognito_identity_pool_roles_attachment" "main" {
   }
 
   role_mapping {
-    identity_provider         = "${aws_cognito_user_pool.app_pool_v3.endpoint}:${aws_cognito_user_pool_client.app_client.id}"
+    identity_provider         = "${aws_cognito_user_pool.app_pool_v2.endpoint}:${aws_cognito_user_pool_client.app_client.id}"
     ambiguous_role_resolution = "AuthenticatedRole"
     type                      = "Rules"
 
@@ -336,5 +331,5 @@ resource "aws_lambda_permission" "post_confirmation_invoke" {
   action        = "lambda:InvokeFunction"
   function_name = data.aws_lambda_function.post_confirmation_wallet_creator.function_name
   principal     = "cognito-idp.amazonaws.com"
-  source_arn    = aws_cognito_user_pool.app_pool_v3.arn
+  source_arn    = aws_cognito_user_pool.app_pool_v2.arn
 } 

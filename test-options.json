@@ -1,0 +1,7 @@
+{
+  "httpMethod": "OPTIONS",
+  "path": "/folders",
+  "headers": {
+    "origin": "https://d2xl0r3mv20sy5.cloudfront.net"
+  }
+}
