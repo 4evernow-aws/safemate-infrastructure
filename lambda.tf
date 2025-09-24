@@ -53,22 +53,23 @@ resource "aws_lambda_function" "token_vault" {
 # Hedera Service Lambda Function (Comprehensive blockchain operations)
 # Hedera Service Lambda Function (Comprehensive blockchain operations)
 resource "aws_lambda_function" "hedera_service" {
-  filename         = "services/hedera-service/hedera-service-fixed.zip"
+  s3_bucket       = aws_s3_bucket.static_hosting.bucket
+  s3_key          = "lambda-packages/hedera-service-with-sdk.zip"
   function_name    = "${local.name_prefix}-hedera-service"
   role            = aws_iam_role.hedera_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("services/hedera-service/hedera-service-fixed.zip")
+  source_code_hash = filebase64sha256("services/hedera-service/hedera-service-with-sdk.zip")
   runtime         = "nodejs18.x"
   timeout         = 90  # Longer timeout for complex blockchain operations
   memory_size     = 1024  # Increased memory for Hedera SDK operations
   
-  # Lambda layer containing Hedera SDK and dependencies
-  layers = [
-    aws_lambda_layer_version.hedera_dependencies_layer.arn
-  ]
+  # No layers needed - Hedera SDK included in package
+  # layers = [
+  #   aws_lambda_layer_version.hedera_dependencies_layer.arn
+  # ]
   
   # Force new deployment
-  description = "Hedera Service Lambda - Updated 20250922 to fix 502 errors"
+  description = "Hedera Service Lambda - Updated 20250924 with Hedera SDK included"
 
   environment {
     variables = {
@@ -78,7 +79,7 @@ resource "aws_lambda_function" "hedera_service" {
       WALLET_AUDIT_TABLE         = aws_dynamodb_table.wallet_audit.name
       HEDERA_TOKENS_TABLE        = aws_dynamodb_table.groups.name  # Reuse groups table for tokens
       HEDERA_NFTS_TABLE          = aws_dynamodb_table.group_activities.name  # Reuse activities table for NFTs
-      HEDERA_FOLDERS_TABLE       = aws_dynamodb_table.hedera_folders.name
+      SAFEMATE_FOLDERS_TABLE     = aws_dynamodb_table.hedera_folders.name
       HEDERA_CONTRACTS_TABLE     = aws_dynamodb_table.shared_wallets.name  # Reuse shared wallets for contracts
       BLOCKCHAIN_AUDIT_TABLE     = aws_dynamodb_table.wallet_audit.name
       WALLET_KMS_KEY_ID          = aws_kms_key.safemate_master_key.key_id
@@ -144,7 +145,8 @@ resource "aws_lambda_function" "wallet_manager" {
 
 # User Onboarding Lambda Function
 resource "aws_lambda_function" "user_onboarding" {
-  filename         = "services/user-onboarding/user-onboarding.zip"
+  s3_bucket        = "safemate-lambda-deployments"
+  s3_key          = "user-onboarding.zip"
   function_name    = "${local.name_prefix}-user-onboarding"
   role            = aws_iam_role.user_onboarding_lambda_exec.arn
   handler         = "index.handler"
@@ -153,18 +155,21 @@ resource "aws_lambda_function" "user_onboarding" {
   timeout         = 90
   memory_size     = 512
   
-  # Use Lambda layer for Hedera SDK dependencies
-  layers = ["arn:aws:lambda:ap-southeast-2:994220462693:layer:hedera-sdk-layer:1"]
+  # Hedera SDK dependencies included directly in package (no layer needed)
+  # layers = ["arn:aws:lambda:ap-southeast-2:994220462693:layer:hedera-sdk-layer:1"]
 
   environment {
     variables = {
-      HEDERA_NETWORK           = var.hedera_network
-      WALLET_KEYS_TABLE        = aws_dynamodb_table.wallet_keys.name
-      WALLET_METADATA_TABLE    = aws_dynamodb_table.wallet_metadata.name
-      WALLET_KMS_KEY_ID        = aws_kms_key.safemate_master_key.arn
-      APP_SECRETS_KMS_KEY_ID   = aws_kms_key.safemate_master_key.arn
-      COGNITO_USER_POOL_ID     = aws_cognito_user_pool.app_pool_v3.id
-      REGION                   = data.aws_region.current.name
+      HEDERA_NETWORK                    = var.hedera_network
+      WALLET_KEYS_TABLE                 = aws_dynamodb_table.wallet_keys.name
+      WALLET_METADATA_TABLE             = aws_dynamodb_table.wallet_metadata.name
+      WALLET_KMS_KEY_ID                 = aws_kms_key.safemate_master_key.arn
+      APP_SECRETS_KMS_KEY_ID            = aws_kms_key.safemate_master_key.arn
+      OPERATOR_PRIVATE_KEY_KMS_KEY_ID   = aws_kms_key.safemate_master_key.arn
+      OPERATOR_ACCOUNT_ID               = "0.0.6428427"
+      OPERATOR_PRIVATE_KEY_ENCRYPTED    = "PLACEHOLDER_ENCRYPTED_PRIVATE_KEY"
+      COGNITO_USER_POOL_ID              = aws_cognito_user_pool.app_pool_v3.id
+      REGION                            = data.aws_region.current.name
     }
   }
 
@@ -1495,7 +1500,7 @@ resource "aws_api_gateway_integration_response" "vault_options_integration_respo
   status_code = aws_api_gateway_method_response.vault_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,PUT,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -1509,7 +1514,7 @@ resource "aws_api_gateway_integration_response" "wallet_options_integration_resp
   status_code = aws_api_gateway_method_response.wallet_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -1522,7 +1527,7 @@ resource "aws_api_gateway_integration_response" "wallet_create_options_integrati
   status_code = aws_api_gateway_method_response.wallet_create_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -1589,7 +1594,7 @@ resource "aws_api_gateway_integration_response" "groups_options_integration_resp
   status_code = aws_api_gateway_method_response.groups_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -1602,7 +1607,7 @@ resource "aws_api_gateway_integration_response" "groups_members_options_integrat
   status_code = aws_api_gateway_method_response.groups_members_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -1617,7 +1622,7 @@ resource "aws_api_gateway_integration_response" "groups_wallets_options_integrat
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
   }
 
@@ -1633,7 +1638,7 @@ resource "aws_api_gateway_integration_response" "groups_invitations_options_inte
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
   }
 
@@ -1918,7 +1923,6 @@ resource "aws_api_gateway_method_response" "invitations_respond_options_response
 # API Gateway deployment
 resource "aws_api_gateway_deployment" "vault_deployment" {
   rest_api_id = aws_api_gateway_rest_api.vault_api.id
-  stage_name  = var.environment
 
   depends_on = [
     aws_api_gateway_method.vault_get,
@@ -1933,7 +1937,6 @@ resource "aws_api_gateway_deployment" "vault_deployment" {
 # Wallet API Gateway deployment
 resource "aws_api_gateway_deployment" "wallet_deployment" {
   rest_api_id = aws_api_gateway_rest_api.wallet_api.id
-  stage_name  = var.environment
 
   depends_on = [
     aws_api_gateway_method.wallet_get,
@@ -1950,7 +1953,6 @@ resource "aws_api_gateway_deployment" "wallet_deployment" {
 # API Gateway deployment for onboarding
 resource "aws_api_gateway_deployment" "onboarding_deployment" {
   rest_api_id = aws_api_gateway_rest_api.onboarding_api.id
-  stage_name  = var.environment
 
   depends_on = [
     aws_api_gateway_method.onboarding_status_post,
@@ -2008,6 +2010,8 @@ resource "aws_api_gateway_deployment" "onboarding_deployment" {
       aws_api_gateway_integration_response.onboarding_status_options_integration_response.id,
       aws_api_gateway_integration_response.onboarding_retry_options_integration_response.id,
       aws_api_gateway_integration_response.onboarding_start_options_integration_response.id,
+      aws_api_gateway_authorizer.onboarding_cognito_authorizer.id,
+      "cors-preflight-fix-20250122-v2",
     ]))
   }
 
@@ -2019,7 +2023,6 @@ resource "aws_api_gateway_deployment" "onboarding_deployment" {
 # Hedera API Gateway deployment
 resource "aws_api_gateway_deployment" "hedera_deployment" {
   rest_api_id = aws_api_gateway_rest_api.hedera_api.id
-  stage_name  = var.environment
 
   depends_on = [
     # New endpoints
@@ -2126,6 +2129,7 @@ resource "aws_api_gateway_deployment" "hedera_deployment" {
     aws_api_gateway_gateway_response.hedera_access_denied,
     aws_api_gateway_gateway_response.hedera_default_4xx,
     aws_api_gateway_gateway_response.hedera_default_5xx,
+    aws_api_gateway_gateway_response.hedera_missing_authentication_token,
   ]
 
   triggers = {
@@ -2166,7 +2170,8 @@ resource "aws_api_gateway_deployment" "hedera_deployment" {
       aws_api_gateway_integration_response.folders_options_integration_response.id,
       aws_api_gateway_integration_response.folders_folder_id_options_integration_response.id,
       aws_lambda_function.hedera_service.id,
-      "lambda-502-fix-force-deploy-20250922-v2",
+      aws_api_gateway_authorizer.hedera_cognito_authorizer.id,
+      "cors-preflight-fix-20250124-v3",
     ]))
   }
 
@@ -3055,7 +3060,7 @@ resource "aws_api_gateway_integration_response" "balance_options_integration_res
   status_code = aws_api_gateway_method_response.balance_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3086,7 +3091,7 @@ resource "aws_api_gateway_integration_response" "transactions_options_integratio
   status_code = aws_api_gateway_method_response.transactions_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3117,7 +3122,7 @@ resource "aws_api_gateway_integration_response" "nft_options_integration_respons
   status_code = aws_api_gateway_method_response.nft_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3148,7 +3153,7 @@ resource "aws_api_gateway_integration_response" "nft_create_options_integration_
   status_code = aws_api_gateway_method_response.nft_create_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3179,7 +3184,7 @@ resource "aws_api_gateway_integration_response" "nft_list_options_integration_re
   status_code = aws_api_gateway_method_response.nft_list_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3243,7 +3248,7 @@ resource "aws_api_gateway_integration_response" "files_options_integration_respo
   status_code = aws_api_gateway_method_response.files_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,DELETE,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3256,7 +3261,7 @@ resource "aws_api_gateway_integration_response" "files_upload_options_integratio
   status_code = aws_api_gateway_method_response.files_upload_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3269,7 +3274,7 @@ resource "aws_api_gateway_integration_response" "files_content_options_integrati
   status_code = aws_api_gateway_method_response.files_content_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3282,7 +3287,7 @@ resource "aws_api_gateway_integration_response" "files_file_id_options_integrati
   status_code = "200"
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,DELETE,OPTIONS'"
   }
 }
@@ -3396,7 +3401,7 @@ resource "aws_api_gateway_integration_response" "folders_options_integration_res
   status_code = aws_api_gateway_method_response.folders_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,DELETE,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3409,7 +3414,7 @@ resource "aws_api_gateway_integration_response" "folders_folder_id_options_integ
   status_code = aws_api_gateway_method_response.folders_folder_id_options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'DELETE,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
   }
@@ -3427,7 +3432,7 @@ resource "aws_api_gateway_gateway_response" "hedera_unauthorized" {
 
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,DELETE,OPTIONS'"
     "gatewayresponse.header.Access-Control-Allow-Credentials" = "'true'"
   }
@@ -3444,7 +3449,7 @@ resource "aws_api_gateway_gateway_response" "hedera_access_denied" {
 
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,DELETE,OPTIONS'"
     "gatewayresponse.header.Access-Control-Allow-Credentials" = "'true'"
   }
@@ -3460,7 +3465,7 @@ resource "aws_api_gateway_gateway_response" "hedera_default_4xx" {
 
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,DELETE,OPTIONS'"
     "gatewayresponse.header.Access-Control-Allow-Credentials" = "'true'"
   }
@@ -3476,7 +3481,24 @@ resource "aws_api_gateway_gateway_response" "hedera_default_5xx" {
 
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
+    "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,DELETE,OPTIONS'"
+    "gatewayresponse.header.Access-Control-Allow-Credentials" = "'true'"
+  }
+}
+
+resource "aws_api_gateway_gateway_response" "hedera_missing_authentication_token" {
+  rest_api_id   = aws_api_gateway_rest_api.hedera_api.id
+  response_type = "MISSING_AUTHENTICATION_TOKEN"
+  status_code   = "200"
+
+  response_templates = {
+    "application/json" = "{}"
+  }
+
+  response_parameters = {
+    "gatewayresponse.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,DELETE,OPTIONS'"
     "gatewayresponse.header.Access-Control-Allow-Credentials" = "'true'"
   }
@@ -3494,7 +3516,7 @@ resource "aws_api_gateway_gateway_response" "groups_unauthorized" {
 
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,OPTIONS'"
     "gatewayresponse.header.Access-Control-Allow-Credentials" = "'true'"
   }
@@ -3511,7 +3533,7 @@ resource "aws_api_gateway_gateway_response" "groups_access_denied" {
 
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,OPTIONS'"
     "gatewayresponse.header.Access-Control-Allow-Credentials" = "'true'"
   }
@@ -3527,7 +3549,7 @@ resource "aws_api_gateway_gateway_response" "groups_default_4xx" {
 
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,OPTIONS'"
     "gatewayresponse.header.Access-Control-Allow-Credentials" = "'true'"
   }
@@ -3543,7 +3565,7 @@ resource "aws_api_gateway_gateway_response" "groups_default_5xx" {
 
   response_parameters = {
     "gatewayresponse.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "gatewayresponse.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "gatewayresponse.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,OPTIONS'"
     "gatewayresponse.header.Access-Control-Allow-Credentials" = "'true'"
   }
@@ -3765,7 +3787,7 @@ resource "aws_api_gateway_integration_response" "invitations_options_integration
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
   }
 
@@ -3780,7 +3802,7 @@ resource "aws_api_gateway_integration_response" "invitations_respond_options_int
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"  = "'https://d2xl0r3mv20sy5.cloudfront.net'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-cognito-token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
   }
 
@@ -3789,11 +3811,11 @@ resource "aws_api_gateway_integration_response" "invitations_respond_options_int
 
 # Post-Confirmation Wallet Creator Lambda Function
 resource "aws_lambda_function" "post_confirmation_wallet_creator" {
-  filename         = "services/post-confirmation-wallet-creator/post-confirmation-wallet-creator.zip"
+  filename         = "services/post-confirmation-wallet-creator/post-confirmation-wallet-creator-final.zip"
   function_name    = "${local.name_prefix}-post-confirmation-wallet-creator"
   role            = aws_iam_role.post_confirmation_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("services/post-confirmation-wallet-creator/post-confirmation-wallet-creator.zip")
+  source_code_hash = filebase64sha256("services/post-confirmation-wallet-creator/post-confirmation-wallet-creator-final.zip")
   runtime         = "nodejs18.x"
   timeout         = 30
   memory_size     = 256

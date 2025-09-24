@@ -21,8 +21,10 @@
  * - @aws-sdk/lib-dynamodb: ^3.891.0
  * - @aws-sdk/client-kms: ^3.891.0
  *
- * Last Updated: September 20, 2025
- * Status: Real Hedera integration with Lambda layer - NO MOCK WALLETS policy
+ * Last Updated: January 22, 2025
+ * Status: Real Hedera integration with local package - NO MOCK WALLETS policy
+ * Fixed: Removed problematic Lambda layer, added Hedera SDK directly to package
+ * Fixed: Operator credentials now retrieved from database instead of environment variables
  * Fixed: Operator account DER private key parsing for existing account 0.0.6428427
  */
 
@@ -48,20 +50,18 @@ const corsHeaders = {
 const WALLET_METADATA_TABLE = process.env.WALLET_METADATA_TABLE || 'preprod-safemate-wallet-metadata';
 const WALLET_KEYS_TABLE = process.env.WALLET_KEYS_TABLE || 'preprod-safemate-wallet-keys';
 const WALLET_KMS_KEY_ID = process.env.WALLET_KMS_KEY_ID || 'arn:aws:kms:ap-southeast-2:994220462693:key/3b18b0c0-dd1f-41db-8bac-6ec857c1ed05';
-const OPERATOR_PRIVATE_KEY_KMS_KEY_ID = process.env.OPERATOR_PRIVATE_KEY_KMS_KEY_ID || 'arn:aws:kms:ap-southeast-2:994220462693:key/3b18b0c0-dd1f-41db-8bac-6ec857c1ed05';
-const OPERATOR_ACCOUNT_ID = process.env.OPERATOR_ACCOUNT_ID || '0.0.6428427';
-const OPERATOR_PRIVATE_KEY_ENCRYPTED = process.env.OPERATOR_PRIVATE_KEY_ENCRYPTED || 'PLACEHOLDER_ENCRYPTED_PRIVATE_KEY';
+// Operator credentials are now retrieved from database dynamically
 const HEDERA_NETWORK = process.env.HEDERA_NETWORK || 'testnet';
 const AWS_REGION = process.env.AWS_REGION || 'ap-southeast-2';
 
-// Load Hedera SDK from Lambda layer - REQUIRED
+// Load Hedera SDK from local package - REQUIRED
 let Client, AccountCreateTransaction, PrivateKey, Hbar, AccountId, AccountBalanceQuery;
 let hederaSDKAvailable = false;
 
 try {
-  console.log('🔍 Attempting to load Hedera SDK from Lambda layer...');
+  console.log('🔍 Attempting to load Hedera SDK from local package...');
   
-  // Load from Lambda layer (available in /opt/nodejs/node_modules)
+  // Load from local package (included in Lambda deployment)
   ({
     Client,
     AccountCreateTransaction,
@@ -72,11 +72,11 @@ try {
   } = require('@hashgraph/sdk'));
   
   hederaSDKAvailable = true;
-  console.log('✅ Hedera SDK loaded successfully from Lambda layer');
+  console.log('✅ Hedera SDK loaded successfully from local package');
   console.log('✅ Client type:', typeof Client);
   console.log('✅ AccountCreateTransaction type:', typeof AccountCreateTransaction);
 } catch (error) {
-  console.error('❌ CRITICAL: Hedera SDK not available from Lambda layer:', error.message);
+  console.error('❌ CRITICAL: Hedera SDK not available from local package:', error.message);
   console.error('❌ Error stack:', error.stack);
   console.error('❌ Cannot create real Hedera wallets without SDK');
   hederaSDKAvailable = false;
@@ -123,25 +123,41 @@ function extractUserInfo(event) {
 }
 
 /**
- * Get operator credentials from KMS
+ * Get operator credentials from database and KMS
  */
 async function getOperatorCredentials() {
   try {
-    console.log('🔍 Getting operator credentials from KMS...');
+    console.log('🔍 Getting operator credentials from database...');
+    console.log('📋 Table name:', WALLET_KEYS_TABLE);
 
-    if (!OPERATOR_ACCOUNT_ID || !OPERATOR_PRIVATE_KEY_ENCRYPTED) {
-      throw new Error('Operator credentials not configured in environment variables');
+    // Get operator credentials from database
+    const getCommand = new GetCommand({
+      TableName: WALLET_KEYS_TABLE,
+      Key: {
+        user_id: 'hedera_operator'
+      }
+    });
+
+    console.log('📋 DynamoDB command:', JSON.stringify(getCommand, null, 2));
+    const result = await dynamodbDoc.send(getCommand);
+    console.log('📋 DynamoDB result:', JSON.stringify(result, null, 2));
+    
+    if (!result.Item) {
+      throw new Error('Operator account not found in database');
     }
 
-    // Check if we have placeholder values
-    if (OPERATOR_PRIVATE_KEY_ENCRYPTED === 'PLACEHOLDER_ENCRYPTED_PRIVATE_KEY') {
-      throw new Error('Operator credentials are not configured. Please set up real operator credentials.');
-    }
+    const operatorAccountId = result.Item.account_id;
+    const encryptedPrivateKey = result.Item.encrypted_private_key;
+    const kmsKeyId = result.Item.kms_key_id;
 
-    // Get operator private key from KMS
+    console.log('✅ Operator account found in database:', operatorAccountId);
+    console.log('📋 KMS Key ID:', kmsKeyId);
+    console.log('📋 Encrypted private key length:', encryptedPrivateKey ? encryptedPrivateKey.length : 'undefined');
+
+    // Decrypt the private key using KMS
     const decryptCommand = new DecryptCommand({
-      KeyId: OPERATOR_PRIVATE_KEY_KMS_KEY_ID,
-      CiphertextBlob: Buffer.from(OPERATOR_PRIVATE_KEY_ENCRYPTED, 'base64')
+      KeyId: kmsKeyId,
+      CiphertextBlob: Buffer.from(encryptedPrivateKey, 'base64')
     });
 
     const decryptResult = await kms.send(decryptCommand);
@@ -175,7 +191,7 @@ async function getOperatorCredentials() {
     
     return {
       privateKey: privateKey,
-      accountId: AccountId.fromString(OPERATOR_ACCOUNT_ID)
+      accountId: AccountId.fromString(operatorAccountId)
     };
   } catch (error) {
     console.error('❌ Failed to get operator credentials:', error);
@@ -498,18 +514,35 @@ async function startOnboarding(userId, email) {
 /**
  * Main Lambda handler
  */
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   console.log('🔧 Lambda function invoked with event:', JSON.stringify(event, null, 2));
   console.log('🔧 Environment variables:', {
     WALLET_METADATA_TABLE,
     WALLET_KEYS_TABLE,
     WALLET_KMS_KEY_ID,
-    OPERATOR_PRIVATE_KEY_KMS_KEY_ID,
-    OPERATOR_ACCOUNT_ID,
     HEDERA_NETWORK,
     AWS_REGION,
     HEDERA_SDK_AVAILABLE: hederaSDKAvailable
   });
+
+  // Add a simple test to see if the function can execute basic operations
+  try {
+    console.log('🔧 Testing basic operations...');
+    console.log('🔧 DynamoDB client type:', typeof dynamodbDoc);
+    console.log('🔧 KMS client type:', typeof kms);
+    console.log('🔧 Basic test passed');
+  } catch (error) {
+    console.error('❌ Basic test failed:', error);
+    return {
+      statusCode: 500,
+      headers: corsHeaders,
+      body: JSON.stringify({
+        success: false,
+        error: 'Basic test failed: ' + error.message,
+        stack: error.stack
+      })
+    };
+  }
 
   try {
     // Handle CORS preflight

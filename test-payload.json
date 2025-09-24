@@ -1,0 +1,10 @@
+{
+  "httpMethod": "GET",
+  "path": "/onboarding/status",
+  "headers": {
+    "authorization": "Bearer test"
+  },
+  "requestContext": {
+    "requestId": "test-request-id"
+  }
+}

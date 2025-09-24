@@ -1,0 +1,1 @@
+{"httpMethod":"GET","path":"/transactions","queryStringParameters":{"accountId":"0.0.6890393","limit":"10"},"headers":{"Authorization":"Bearer test-token"}}

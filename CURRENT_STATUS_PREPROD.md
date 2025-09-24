@@ -20,6 +20,13 @@
    - **Deployment**: 58MB package deployed via S3 to avoid size limits
    - **Result**: PostConfirmation Lambda now successfully creates Hedera wallets without module errors
 
+3. **Wallet Authentication Issues** - RESOLVED ✅ (January 22, 2025)
+   - **Root Cause**: API Gateway Cognito authorizer not properly configured and deployed
+   - **Solution**: Updated API Gateway deployment triggers to include authorizer configuration
+   - **Frontend Fixes**: Enhanced token validation and error handling in `SecureWalletService`
+   - **Email Verification**: Fixed 400 Bad Request handling for confirmed users
+   - **Result**: Wallet operations now work correctly with proper authentication
+
 ### ✅ Previously Fixed Issues (September 22, 2025)
 
 1. **Persistent Lambda Function 502 Errors** - RESOLVED ✅
