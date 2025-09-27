@@ -54,11 +54,11 @@ resource "aws_lambda_function" "token_vault" {
 # Hedera Service Lambda Function (Comprehensive blockchain operations)
 resource "aws_lambda_function" "hedera_service" {
   s3_bucket       = aws_s3_bucket.static_hosting.bucket
-  s3_key          = "lambda-packages/hedera-service-treasury-fix-v19.zip"
+  s3_key          = "lambda-packages/hedera-service-treasury-fix-v20.zip"
   function_name    = "${local.name_prefix}-hedera-service"
   role            = aws_iam_role.hedera_lambda_exec.arn
   handler         = "index.handler"
-  source_code_hash = filebase64sha256("services/hedera-service/hedera-service-treasury-fix-v19.zip")
+  source_code_hash = filebase64sha256("services/hedera-service/hedera-service-treasury-fix-v20.zip")
   runtime         = "nodejs18.x"
   timeout         = 90  # Longer timeout for complex blockchain operations
   memory_size     = 1024  # Increased memory for Hedera SDK operations
@@ -69,7 +69,7 @@ resource "aws_lambda_function" "hedera_service" {
   # ]
   
   # Force new deployment
-  description = "Hedera Service Lambda - Treasury Fix v19 (Fixed NFT Ownership Detection for Treasury Accounts)"
+  description = "Hedera Service Lambda - Treasury Fix v20 (Fixed NFT Ownership Detection + Dependencies)"
 
   environment {
     variables = {
